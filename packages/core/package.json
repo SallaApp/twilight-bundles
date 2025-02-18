@@ -7,12 +7,19 @@
   "module": "./dist/twilight-bundles.js",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./dist/twilight-bundles.js",
       "require": "./dist/twilight-bundles.cjs"
     },
-    "./vite-plugin": {
-      "import": "./dist/vite-plugin.js",
-      "require": "./dist/vite-plugin.cjs"
+    "./vite-plugins": {
+      "types": "./types/vite-plugins/index.d.ts",
+      "import": "./dist/vite-plugins/index.js",
+      "require": "./dist/vite-plugins/index.cjs"
+    },
+    "./vite-plugins/*": {
+      "types": "./types/vite-plugins/*.d.ts",
+      "import": "./dist/vite-plugins/*.js",
+      "require": "./dist/vite-plugins/*.cjs"
     }
   },
   "engines": {

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm -r dev",
+    "dev": "pnpm --parallel -r dev",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format"

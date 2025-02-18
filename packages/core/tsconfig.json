@@ -15,11 +15,12 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     "paths": {
       "lit": ["node_modules/lit"],
       "lit/*": ["node_modules/lit/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "vite-plugins.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,20 +1,11 @@
-// import 'systemjs';
 import SallaComponent from './components/salla-base-component';
 import Helpers from './helpers/helpers';
 import SallaCustomComponent from './components/salla-custom-component';
 
-interface ComponentSchema {
-    id: string;
-    key: string;
-    name: string;
-    data?: Record<string, any>;
-}
-
-export class TwilightBundles {
+class TwilightBundles {
     private components: Map<string, { dynamicTagName: string, component?: typeof SallaComponent }> = new Map();
     private pendingComponents: { tagName: string, component: HTMLElement }[] = [];
     private initialized: boolean = false;
-    private importMap: Record<string, string> = {};
 
     constructor() {
         Salla.onReady()

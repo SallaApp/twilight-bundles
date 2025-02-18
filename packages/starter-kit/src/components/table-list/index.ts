@@ -10,7 +10,15 @@ export default class TableList extends LitElement {
             description?: string;
         }>;
     } = {
-        items: [],
+        items: [{
+            id: 1,
+            title: 'Item 1',
+            description: 'This is item 1',
+        }, {
+            id: 2,
+            title: 'Item 2',
+            description: 'This is item 2',
+        }],
     };
 
     static styles = css`

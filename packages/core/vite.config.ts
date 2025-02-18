@@ -6,17 +6,15 @@ export default defineConfig({
     lib: {
       entry: {
         'twilight-bundles': resolve(__dirname, 'src/index.ts'),
-        'vite-plugin': resolve(__dirname, 'vite-plugin.ts')
+        'vite-plugins/index': resolve(__dirname, 'vite-plugins.ts'),
+        'vite-plugins/build': resolve(__dirname, 'src/vite-plugins/build.ts'),
+        'vite-plugins/demo': resolve(__dirname, 'src/vite-plugins/demo.ts'),
+        'vite-plugins/transform': resolve(__dirname, 'src/vite-plugins/transform.ts')
       },
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-      external: ['vite', 'path', 'glob'],
-      output: {
-        sourcemap: true,
-        dir: 'dist'
-      }
-    },
-    target: 'esnext'
+      external: ['lit', 'lit-element', 'lit-html', 'fs', 'path']
+    }
   }
 });

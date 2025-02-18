@@ -30,7 +30,7 @@ export default class Helpers {
         const demo = currentScript?.hasAttribute('demo-mode');
         const storeId = currentScript?.getAttribute('store-id');
         const config = JSON.parse(currentScript?.getAttribute('config') || 'false');
-        const components = currentScript?.getAttribute('components')?.split(',') || [];
+        // const components = currentScript?.getAttribute('components')?.split(',') || [];
 
         if (demo || config || storeId) {
             return Salla.init(config || {
