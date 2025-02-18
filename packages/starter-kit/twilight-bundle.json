@@ -1,0 +1,121 @@
+{
+    "$schema": "./twilight-bundle.schema.json",
+    "name": {
+        "ar": "حزمة مكونات سلة",
+        "en": "Salla Components Bundle"
+    },
+    "version": "1.0.0",
+    "description": {
+        "ar": "حزمة مكونات قابلة لإعادة الاستخدام لبناء تجربة تسوق مميزة",
+        "en": "A bundle of reusable components for building exceptional shopping experiences"
+    },
+    "author": {
+        "name": "Salla",
+        "email": "support@salla.sa",
+        "url": "https://salla.dev"
+    },
+    "repository": "https://github.com/SallaApp/twilight-bundles-starter-kit",
+    "license": "MIT",
+    "components": [
+        {
+            "name": {
+                "ar": "بطاقة المنتج",
+                "en": "Product Card"
+            },
+            "path": "product-card",
+            "icon": "sicon-box",
+            "preview": "assets/previews/product-card.png",
+            "settings": [
+                {
+                    "type": "string",
+                    "id": "title",
+                    "label": {
+                        "ar": "عنوان المنتج",
+                        "en": "Product Title"
+                    },
+                    "default": "Product Name"
+                },
+                {
+                    "type": "string",
+                    "id": "price",
+                    "label": {
+                        "ar": "سعر المنتج",
+                        "en": "Product Price"
+                    },
+                    "default": "$99.99"
+                },
+                {
+                    "type": "string",
+                    "id": "image",
+                    "label": {
+                        "ar": "صورة المنتج",
+                        "en": "Product Image"
+                    },
+                    "validation": {
+                        "pattern": "^https?://.*|^/.*"
+                    }
+                },
+                {
+                    "type": "string",
+                    "id": "discount",
+                    "label": {
+                        "ar": "نسبة الخصم",
+                        "en": "Discount Percentage"
+                    },
+                    "description": {
+                        "ar": "مثال: -30%",
+                        "en": "Example: -30%"
+                    }
+                }
+            ],
+            "dependencies": [],
+            "tags": ["product", "card", "ui"]
+        },
+        {
+            "name": {
+                "ar": "قائمة الجدول",
+                "en": "Table List"
+            },
+            "path": "table-list",
+            "icon": "sicon-list-ul",
+            "preview": "assets/previews/table-list.png",
+            "settings": [
+                {
+                    "type": "array",
+                    "id": "items",
+                    "label": {
+                        "ar": "عناصر القائمة",
+                        "en": "List Items"
+                    },
+                    "default": [],
+                    "validation": {
+                        "min": 0
+                    }
+                },
+                {
+                    "type": "object",
+                    "id": "item_template",
+                    "label": {
+                        "ar": "نموذج العنصر",
+                        "en": "Item Template"
+                    },
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ],
+            "dependencies": [],
+            "tags": ["list", "table", "ui"]
+        }
+    ]
+}

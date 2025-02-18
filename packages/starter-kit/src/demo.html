@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salla Components Demo</title>
+    <script type="module" src="https://cdn.salla.network/js/twilight/2.14.65/twilight.esm.js"></script>
+    <script>
+        window.customComponents = [
+            '/src/components/product-card/index.ts',
+            '/src/components/table-list/index.ts',
+        ];
+    </script>
+    <script type="module" src="http://127.0.0.1:5500/node_modules/@salla.sa/twilight-bundles/dist/twilight-bundles.js" demo-mode></script>
+    <style>
+        :root {
+            --primary-color: #2196f3;
+            --success-color: #4CAF50;
+            --danger-color: #ff4444;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Product Cards Section -->
+        <div class="section">
+            <h2 class="section-title">Product Cards</h2>
+            <div class="components-grid">
+                <salla-custom-component 
+                    component-name="product-card" 
+                    settings='{"title": "Wireless Headphones", "price": "$129.99", "image": "https://placehold.co/200x200/2196f3/ffffff?text=Headphones", "discount": "-20%"}'
+                ></salla-custom-component>
+                
+                <salla-custom-component 
+                    component-name="product-card" 
+                    settings='{"title": "Smart Watch", "price": "$199.99", "image": "https://placehold.co/200x200/ff4444/ffffff?text=Watch", "discount": "-15%"}'
+                ></salla-custom-component>
+                
+                <salla-custom-component 
+                    component-name="product-card" 
+                    settings='{"title": "Laptop Bag", "price": "$49.99", "image": "https://placehold.co/200x200/4CAF50/ffffff?text=Bag"}'
+                ></salla-custom-component>
+            </div>
+        </div>
+
+        <!-- Table List Section -->
+        <div class="section">
+            <h2 class="section-title">Table List Example</h2>
+            <salla-custom-component 
+                component-name="table-list" 
+                settings='{
+                    "items": [
+                        {
+                            "id": 1,
+                            "title": "Getting Started with Salla Components",
+                            "description": "Learn how to create and customize Salla components for your e-commerce store"
+                        },
+                        {
+                            "id": 2,
+                            "title": "Component Best Practices",
+                            "description": "Tips and guidelines for building efficient and maintainable components"
+                        },
+                        {
+                            "id": 3,
+                            "title": "Advanced Component Features",
+                            "description": "Explore advanced features and integrations available in Salla components"
+                        }
+                    ]
+                }'
+            ></salla-custom-component>
+        </div>
+    </div>
+</body>
+</html>
