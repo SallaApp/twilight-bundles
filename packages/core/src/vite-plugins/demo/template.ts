@@ -14,7 +14,7 @@ const importMap = {
     }
 };
 
-export function createDemoHTML(componentFiles: string[]) {
+export function createDemoHTML(componentFiles: Record<string, string>) {
     const translations = {
         ar: {
             title: 'معرض مكونات سلة',
@@ -46,7 +46,7 @@ export function createDemoHTML(componentFiles: string[]) {
     <script type="importmap">
     ${JSON.stringify(importMap, null, 2)}
     </script>
-    <script>window.customComponents = ${JSON.stringify(componentFiles)};</script>
+    <script>window.customComponents = ${JSON.stringify(Object.values(componentFiles))};</script>
     <script type="module" src="https://cdn.salla.network/js/twilight/2.14.65/twilight.esm.js"></script>
     <script type="module" src="http://localhost:5500/packages/core/dist/twilight-bundles.js" demo-mode></script>
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/pingarlt.css">
@@ -448,8 +448,7 @@ export function createDemoHTML(componentFiles: string[]) {
 
         <section class="components-section">
             <h2 class="section-title">المكونات</h2>
-            ${componentFiles.map(file => {
-                const componentName = file.split('/').slice(-2)[0];
+            ${Object.entries(componentFiles).map(([componentName, file]) => {
                 const displayName = componentName
                     .split('-')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))

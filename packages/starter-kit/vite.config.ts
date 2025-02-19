@@ -8,26 +8,8 @@ import {
 
 export default defineConfig({
   plugins: [
-    // Transform plugin for component registration
     sallaTransformPlugin(),
-    
-    // // Build plugin for bundling and optimization
-    sallaBuildPlugin({
-      outDir: 'dist',
-      componentsGlob: 'src/components/*/index.ts'
-    }),
-    
-    // // Demo plugin for development server
-    sallaDemoPlugin({
-      port: 5173,
-      host: 'localhost'
-    })
-  ],
-  server: {
-    // open: '/src/demo.html',
-    watch: {
-      usePolling: true,
-      interval: 100
-    }
-  }
+    sallaBuildPlugin(),
+    sallaDemoPlugin(),
+  ]
 });

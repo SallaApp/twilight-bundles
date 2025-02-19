@@ -7,41 +7,50 @@ interface BuildPluginOptions {
     outDir?: string;
 }
 
-export function findComponentFiles(componentsGlob: string): string[] {
+export function findComponentFiles(): Record<string, string> {
     const baseDir = process.cwd();
     const componentDir = resolve(baseDir, 'src/components');
 
     if (!fs.existsSync(componentDir)) {
-        return [];
+        return {};
     }
 
-    return fs.readdirSync(componentDir)
+    const entries: Record<string, string> = {};
+    fs.readdirSync(componentDir)
         .filter(file => fs.statSync(resolve(componentDir, file)).isDirectory())
-        .map(dir => resolve(componentDir, dir, 'index.ts'))
-        .filter(file => fs.existsSync(file));
+        .forEach(dir => {
+            const entryPath = resolve(componentDir, dir, 'index.ts');
+            if (fs.existsSync(entryPath)) {
+                entries[dir] = entryPath;
+            }
+        });
+
+    return entries;
 }
 
-export function sallaBuildPlugin(options: BuildPluginOptions = {}): Plugin {
-    const {
-        componentsGlob = 'src/components/*/index.ts',
-        outDir = 'dist'
-    } = options;
-
+export function sallaBuildPlugin(): Plugin {
     return {
         name: 'salla-component-build',
         enforce: 'pre' as const,
         config(config) {
+            const entries = findComponentFiles();
+            
+            if (Object.keys(entries).length === 0) {
+                console.warn('No component entries found in src/components directory');
+                return config;
+            }
+            
+            console.log('Building components:', Object.keys(entries));
+            
             return {
                 ...config,
                 build: {
-                    //todo:: make sure to output using component names
+                    ...config.build,
                     lib: {
-                        entry: findComponentFiles(componentsGlob),
+                        entry: entries,
                         formats: ['es'],
                         fileName: (_format, entryName) => `${entryName}.js`
                     },
-                    outDir,
-                    // emptyOutDir: false,
                     rollupOptions: {
                         external: [/^lit/],
                         output: {
@@ -49,14 +58,9 @@ export function sallaBuildPlugin(options: BuildPluginOptions = {}): Plugin {
                                 lit: 'lit',
                                 'lit-element': 'litElement',
                                 'lit-html': 'litHtml'
-                            },
+                            }
                         }
-                    },
-                    ...config.build,
-                },
-                optimizeDeps: {
-                    include: [...(config.optimizeDeps?.include || []), 'lit', 'lit-element', 'lit-html'],
-                    ...config.optimizeDeps,
+                    }
                 }
             };
         }

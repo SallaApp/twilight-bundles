@@ -1,15 +1,8 @@
 import { Plugin } from 'vite';
 import { createDemoHTML } from './demo/template';
-import { configureDemoServer } from './demo/server';
 import { findComponentFiles } from './build';
 import * as fs from 'fs';
 import * as path from 'path';
-
-interface DemoPluginOptions {
-    componentsGlob?: string;
-    port?: number;
-    host?: string;
-}
 
 function cleanupDemoFile(filePath: string) {
     if (filePath && fs.existsSync(filePath)) {
@@ -18,8 +11,7 @@ function cleanupDemoFile(filePath: string) {
     }
 }
 
-export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
-    const { componentsGlob = 'src/components/*/index.ts' } = options;
+export function sallaDemoPlugin(): Plugin {
     let demoPath: string | undefined;
 
     return {
@@ -32,7 +24,7 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
                 return;
             }
 
-            const componentFiles = findComponentFiles(componentsGlob);
+            const componentFiles = findComponentFiles();
             const demoBasePath = '.salla-temp'
             const tempDir = path.resolve(process.cwd(), 'node_modules', demoBasePath);
 
@@ -77,8 +69,10 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
                 ...config,
                 server: {
                     ...config.server,
-                    port: options.port,
-                    host: options.host
+                    watch: {
+                      usePolling: true,
+                      interval: 100
+                    }
                 }
             };
         },

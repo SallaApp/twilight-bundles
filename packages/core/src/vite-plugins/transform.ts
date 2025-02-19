@@ -1,9 +1,5 @@
 import { Plugin } from 'vite';
 
-interface TransformPluginOptions {
-    pattern?: RegExp;
-}
-
 function transformComponent(code: string, id: string, pattern: RegExp) {
     const match = id.match(pattern);
     if (!match) {
@@ -27,10 +23,8 @@ if (typeof ${className} !== 'undefined') {${className}.registerSallaComponent('$
     return { code: transformedCode };
 }
 
-export function sallaTransformPlugin(options: TransformPluginOptions = {}): Plugin {
-    const {
-        pattern = /^.*\/(?<componentDir>components)\/(?<componentName>[^/]+)\/index\.ts$/
-    } = options;
+export function sallaTransformPlugin(): Plugin {
+    const pattern = /^.*\/(?<componentDir>components)\/(?<componentName>[^/]+)\/index\.ts$/;
 
     return {
         name: 'salla-component-transform',
