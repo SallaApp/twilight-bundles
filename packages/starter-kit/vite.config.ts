@@ -1,15 +1,18 @@
-//@ts-nochecks
+//@ts-nocheck
 import { defineConfig } from 'vite';
-import { 
-  sallaBuildPlugin, 
-  sallaDemoPlugin, 
-  sallaTransformPlugin 
+import {
+  sallaBuildPlugin,
+  sallaDemoPlugin,
+  sallaTransformPlugin,
 } from '@salla.sa/twilight-bundles/vite-plugins';
 
 export default defineConfig({
   plugins: [
     sallaTransformPlugin(),
     sallaBuildPlugin(),
-    sallaDemoPlugin(),
+    sallaDemoPlugin({
+      // Uncomment to show only specific components
+      // components: ['product-card', 'scroll-top']
+    }),
   ]
 });

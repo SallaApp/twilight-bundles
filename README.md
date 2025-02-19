@@ -4,7 +4,7 @@ A monorepo for building and developing custom Twilight components for Salla's e-
 
 ## Packages
 
-### 1. Core (`@salla.sa/twilight-bundles-core`)
+### 1. Core (`@salla.sa/twilight-bundles`)
 The core package provides build tools and plugins for Twilight components:
 - Vite plugins for building and development
 - Build configuration and optimization

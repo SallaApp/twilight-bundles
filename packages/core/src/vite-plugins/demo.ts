@@ -4,14 +4,18 @@ import { findComponentFiles } from './build';
 import * as fs from 'fs';
 import * as path from 'path';
 
+interface DemoPluginOptions {
+    components?: string[];  // Optional list of component names to include
+}
+
 function cleanupDemoFile(filePath: string) {
     if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        console.log('Removed auto-generated demo file:', filePath);
+        // console.log('Removed auto-generated demo file:', filePath);
     }
 }
 
-export function sallaDemoPlugin(): Plugin {
+export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
     let demoPath: string | undefined;
 
     return {
@@ -25,6 +29,15 @@ export function sallaDemoPlugin(): Plugin {
             }
 
             const componentFiles = findComponentFiles();
+            
+            // Filter components if options.components is provided
+            const filteredComponents = options.components 
+                ? Object.fromEntries(
+                    Object.entries(componentFiles)
+                        .filter(([name]) => options.components!.includes(name))
+                  )
+                : componentFiles;
+
             const demoBasePath = '.salla-temp'
             const tempDir = path.resolve(process.cwd(), 'node_modules', demoBasePath);
 
@@ -36,7 +49,7 @@ export function sallaDemoPlugin(): Plugin {
             demoPath = path.resolve(tempDir, 'index.html');
 
             // Create demo.html in temp directory
-            fs.writeFileSync(demoPath, createDemoHTML(componentFiles));
+            fs.writeFileSync(demoPath, createDemoHTML(filteredComponents));
 
             // Setup cleanup handlers
             const cleanup = () => {
