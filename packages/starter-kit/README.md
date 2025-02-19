@@ -58,6 +58,74 @@ This starter kit includes three Vite plugins that handle the build process:
 - Configures hot module reloading
 - To disable: Remove from plugins array and set up your own dev server
 
+### Demo Plugin Options
+
+The `sallaDemoPlugin` accepts the following configuration options:
+
+```typescript
+{
+  // Optional: Show only specific components
+  components?: string[];
+
+  // Optional: Customize the demo grid layout
+  grid?: {
+    // CSS grid-template-columns value
+    columns?: string;     // default: 'repeat(auto-fill, minmax(300px, 1fr))'
+    
+    // Gap between components
+    gap?: string;        // default: '1rem'
+    
+    // Responsive breakpoint
+    minWidth?: string;   // default: '300px'
+  };
+
+  // Optional: Add custom CSS
+  css?: string;
+
+  // Optional: Add custom JavaScript
+  js?: string;
+}
+```
+
+#### Example Configuration
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  plugins: [
+    // ... other plugins
+    sallaDemoPlugin({
+      // Show only specific components
+      components: ['product-card', 'scroll-top'],
+      
+      // Customize grid layout
+      grid: {
+        columns: 'repeat(3, 1fr)',
+        gap: '1.5rem',
+        minWidth: '768px'
+      },
+
+      // Add custom styles
+      css: `
+        .component-card {
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          transition: transform 0.2s;
+        }
+        .component-card:hover {
+          transform: translateY(-2px);
+        }
+      `,
+
+      // Add custom JavaScript
+      js: `
+        console.log('Demo page loaded!');
+        // Add your custom JavaScript here
+      `
+    })
+  ]
+});
+```
+
 ## Component Requirements
 
 Each component should:
