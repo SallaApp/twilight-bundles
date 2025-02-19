@@ -1,4 +1,3 @@
-
 export function createDemoHTML(componentFiles: Record<string, string>) {
     const translations = {
         ar: {
@@ -28,124 +27,144 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
     <style>
         :root {
             --font-main: "PingARLT";
-            --primary-400: 220 38% 47%;
-            --primary-force: 0 0% 100%;
+            
+            /* Light theme (default) */
+            --primary-100: 255 255 255;  /* #FFFFFF */
+            --primary-200: 248 249 250;  /* #F8F9FA */
+            --primary-300: 229 231 235;  /* #E5E7EB */
+            --primary-900: 0 131 143;    /* #00838F */
+            --text-primary: 30 30 30;    /* #1E1E1E */
+            --text-secondary: 75 85 99;  /* #4B5563 */
+            --bg-primary: 255 255 255;   /* #FFFFFF */
+            --bg-secondary: 248 249 250; /* #F8F9FA */
+            --border-color: 229 231 235; /* #E5E7EB */
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --primary-100: 30 30 30;     /* #1E1E1E */
+            --primary-200: 42 42 42;     /* #2A2A2A */
+            --primary-300: 51 51 51;     /* #333333 */
+            --primary-900: 122 235 205;  /* #7AEBCD */
+            --text-primary: 255 255 255; /* #FFFFFF */
+            --text-secondary: 156 163 175; /* #9CA3AF */
+            --bg-primary: 30 30 30;      /* #1E1E1E */
+            --bg-secondary: 42 42 42;    /* #2A2A2A */
+            --border-color: 51 51 51;    /* #333333 */
         }
         
         body {
             font-family: var(--font-main), system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
-            background: #f8f9fa;
-            color: #2c3e50;
+            background: rgb(var(--bg-primary));
+            color: rgb(var(--text-primary));
             font-size: 15px;
         }
 
         .nav {
-            background: white;
-            padding: 0.75rem 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background: rgb(var(--bg-primary));
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgb(var(--border-color));
             position: sticky;
             top: 0;
             z-index: 10;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
             gap: 1rem;
+            text-decoration: none;
+            color: rgb(var(--text-primary));
+        }
+
+        .nav-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .nav-btn {
-            background: hsl(var(--primary-400));
-            color: hsl(var(--primary-force));
+            background: rgb(var(--primary-900));
+            color: rgb(var(--bg-primary));
             border: none;
             padding: 0.5rem 1rem;
-            border-radius: 4px;
+            border-radius: 0.5rem;
             cursor: pointer;
-            font-family: var(--font-main);
             font-size: 0.875rem;
-            transition: opacity 0.2s;
+            transition: all 0.2s ease;
         }
 
         .nav-btn:hover {
             opacity: 0.9;
         }
 
-        .components-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        .components {
+            padding: 1.5rem;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            background: rgb(var(--bg-secondary));
+            min-height: calc(100vh - 64px);
         }
 
-        .component-section {
-            margin-bottom: 2rem;
+        .component-card {
+            background: rgb(var(--bg-primary));
+            border: 1px solid rgb(var(--border-color));
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
         }
-        
-        .component-header {
-            background: white;
-            padding: 0.75rem 1rem;
-            border-radius: 6px 6px 0 0;
-            border: 1px solid #edf2f7;
-            border-bottom: none;
+
+        .component-card:hover {
+            border-color: rgb(var(--primary-900));
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .component-name {
             margin: 0;
             font-size: 0.875rem;
-            color: #64748b;
+            color: rgb(var(--text-secondary));
             font-weight: 500;
-        }
-        
-        .component-preview {
-            background: white;
-            padding: 2rem;
-            border-radius: 0 0 6px 6px;
-            border: 1px solid #edf2f7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100px;
-        }
-
-        html.dark {
-            color-scheme: dark;
-        }
-
-        html.dark body {
-            background: #1a1a1a;
-            color: #e5e5e5;
-        }
-
-        html.dark .nav,
-        html.dark .component-header,
-        html.dark .component-preview {
-            background: #242424;
-            border-color: #333;
-        }
-
-        html.dark .component-name {
-            color: #94a3b8;
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
     <nav class="nav">
-        <button class="nav-btn" onclick="document.documentElement.classList.toggle('dark')">
-            ${translations.ar.toggleTheme}
-        </button>
-        <button class="nav-btn" onclick="toggleLanguage()">
-            ${translations.ar.toggleLang}
-        </button>
+        <a class="nav-brand" href="https://salla.dev">
+            <img class="nav-logo" src="https://cdn.prod.website-files.com/63fe4a8108c3c17052878ef9/640478698a898d54481ea309_Group%2059.svg" alt="Salla Logo">
+            <span class="nav-title">Salla Twilight Bundles</span>
+        </a>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
+                ${translations.ar.toggleTheme}
+            </button>
+            <button class="nav-btn" onclick="toggleLanguage()">
+                ${translations.ar.toggleLang}
+            </button>
+        </div>
     </nav>
 
-    <div class="components-container">
+    <div class="components">
         ${Object.entries(componentFiles).map(([name]) => `
-            <section class="component-section">
-                <div class="component-header">
-                    <h3 class="component-name">${name}</h3>
-                </div>
-                <div class="component-preview">
-                    <salla-custom-component component-name="${name}"></salla-custom-component>
-                </div>
-            </section>
+            <div class="component-card">
+                <h3 class="component-name">${name}</h3>
+                <salla-custom-component component-name="${name}"></salla-custom-component>
+            </div>
         `).join('')}
     </div>
 
