@@ -1,11 +1,18 @@
 import { Plugin } from 'vite';
-import { createDemoHTML } from './demo/template';
-import { findComponentFiles } from './build';
+import { createDemoHTML } from './template';
+import { findComponentFiles } from '../build';
 import * as fs from 'fs';
 import * as path from 'path';
 
 interface DemoPluginOptions {
     components?: string[];  // Optional list of component names to include
+    grid?: {
+        columns?: string;   // CSS grid-template-columns value (e.g., 'repeat(3, 1fr)')
+        gap?: string;       // CSS gap value (e.g., '1.5rem')
+        minWidth?: string;  // Min width for auto-fill/auto-fit columns
+    };
+    css?: string;          // Custom CSS to inject
+    js?: string;           // Custom JS to inject
 }
 
 function cleanupDemoFile(filePath: string) {
@@ -49,7 +56,15 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
             demoPath = path.resolve(tempDir, 'index.html');
 
             // Create demo.html in temp directory
-            fs.writeFileSync(demoPath, createDemoHTML(filteredComponents));
+            fs.writeFileSync(demoPath, createDemoHTML(filteredComponents, {
+                grid: {
+                    columns: options.grid?.columns || 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: options.grid?.gap || '1rem',
+                    minWidth: options.grid?.minWidth || '300px'
+                },
+                css: options.css || '',
+                js: options.js || ''
+            }));
 
             // Setup cleanup handlers
             const cleanup = () => {

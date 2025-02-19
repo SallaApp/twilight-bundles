@@ -1,4 +1,14 @@
-export function createDemoHTML(componentFiles: Record<string, string>) {
+export interface DemoTemplateOptions {
+  grid: {
+    columns: string;
+    gap: string;
+    minWidth: string;
+  };
+  css: string;
+  js: string;
+}
+
+export function createDemoHTML(componentFiles: Record<string, string>, options: DemoTemplateOptions) {
   const translations = {
     ar: {
       toggleTheme: 'تغيير المظهر',
@@ -164,9 +174,15 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
 
       .components-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
+        grid-template-columns: ${options.grid.columns};
+        gap: ${options.grid.gap};
         margin-top: 0;
+      }
+
+      @media (max-width: ${options.grid.minWidth}) {
+        .components-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       .component-card {
@@ -280,6 +296,8 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
         updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
     </script>
+    <style>${options.css}</style>
+    <script>${options.js}</script>
   </body>
 </html>`
 }
