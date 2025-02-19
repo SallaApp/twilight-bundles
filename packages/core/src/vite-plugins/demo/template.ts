@@ -4,13 +4,15 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
       toggleTheme: 'تبديل المظهر',
       toggleLang: 'English',
       dir: 'rtl',
-      lang: 'ar'
+      lang: 'ar',
+      title: 'حزم العناصر'
     },
     en: {
       toggleTheme: 'Toggle Theme',
       toggleLang: 'العربية',
       dir: 'ltr',
-      lang: 'en'
+      lang: 'en',
+      title: 'Twilight Bundles'
     }
   };
 
@@ -19,7 +21,7 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twilight Components</title>
+    <title>${translations.ar.title}</title>
     <script>window.customComponents = ${JSON.stringify(Object.values(componentFiles))};</script>
     <link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://cdn.salla.network/images/logo/logo-square.png" />
     <link rel="icon" type="image/png" media="(prefers-color-scheme: dark)" href="https://cdn.salla.network/images/logo/logo-light-square.png" />
@@ -41,6 +43,8 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
         --text-primary: #FFFFFF;
         --text-secondary: #9CA3AF;
         --border-color: #333333;
+        --header-bg: #1d1e20;
+        --component-title: #baf3e5;
       }
 
       :root[data-theme="light"] {
@@ -49,6 +53,7 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
         --text-primary: #1E1E1E;
         --text-secondary: #4B5563;
         --border-color: #E5E7EB;
+        --component-title: #004e5c;
       }
 
       * {
@@ -65,11 +70,26 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
 
       header {
         background-color: var(--header-bg);
-        padding: 1rem;
+        padding: 0.75rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 0.75rem;
+      }
+
+      .header-content {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
       }
 
       .logo {
@@ -79,6 +99,13 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
       .logo img {
         height: 100%;
         width: auto;
+      }
+
+      .title {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin: 0;
       }
 
       .actions {
@@ -98,95 +125,159 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
         font-size: 1rem;
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 0.5rem;
       }
 
       .actions button:hover {
         color: rgb(var(--primary-100));
       }
 
+      .theme-icon {
+        transition: transform 0.3s ease;
+      }
+
+      [data-theme="dark"] .theme-icon.moon {
+        display: none;
+      }
+
+      [data-theme="light"] .theme-icon.sun {
+        display: none;
+      }
+
+      .lang-icon {
+        transition: transform 0.3s ease;
+      }
+
+      [dir="rtl"] .lang-icon {
+        transform: scaleX(-1);
+      }
+
+      .lang-code {
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
       main {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
+        padding: 1.5rem 0;
       }
 
       .components-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
+        gap: 1rem;
+        margin-top: 0;
       }
 
       .component-card {
         background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        color: var(--text-primary);
+        padding: 0.75rem;
       }
 
-      .component-card h2 {
-        color: var(--text-primary);
-        margin-bottom: 1rem;
-        font-size: 1.1rem;
+      .component-card > h2 {
+        color: var(--component-title);
+        font-size: 1.125rem;
+        margin: 0 0 0.75rem;
       }
     </style>
   </head>
   <body>
     <header>
-      <div class="logo">
-        <img src="https://cdn.salla.network/images/logo/logo-light-wide.png" alt="Salla">
-      </div>
-      <div class="actions">
-        <button id="toggleTheme" title="Toggle theme">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-          </svg>
-        </button>
-        <button id="toggleLang" title="Toggle language">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m5 8 6 6"/>
-            <path d="m4 14 6-6 2-3"/>
-            <path d="M2 5h12"/>
-            <path d="M7 2h1"/>
-            <path d="m22 22-5-10-5 10"/>
-            <path d="M14 18h6"/>
-          </svg>
-        </button>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo-container">
+            <div class="logo">
+              <img src="https://cdn.salla.network/images/logo/logo-light-wide.png" alt="Salla">
+            </div>
+            <h1 class="title" id="pageTitle">${translations.ar.title}</h1>
+          </div>
+          <div class="actions">
+            <button id="toggleTheme" title="Toggle theme">
+              <svg class="theme-icon moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+              </svg>
+              <svg class="theme-icon sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2"/>
+                <path d="M12 20v2"/>
+                <path d="m4.93 4.93 1.41 1.41"/>
+                <path d="m17.66 17.66 1.41 1.41"/>
+                <path d="M2 12h2"/>
+                <path d="M20 12h2"/>
+                <path d="m6.34 17.66-1.41 1.41"/>
+                <path d="m19.07 4.93-1.41 1.41"/>
+              </svg>
+            </button>
+            <button id="toggleLang" title="Toggle language">
+              <svg class="lang-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                <path d="M2 12h20"/>
+              </svg>
+              <span class="lang-code">EN</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
     <main>
-      <div class="components-grid">
-        ${Object.entries(componentFiles)
-          .map(([name]) => `
-          <div class="component-card">
-            <h2>${name}</h2>
-            <salla-custom-component component-name="${name}"></salla-custom-component>
-          </div>
-        `)
-          .join('')}
+      <div class="container">
+        <div class="components-grid">
+          ${Object.entries(componentFiles)
+            .map(([name]) => `
+            <div class="component-card">
+              <h2>${name}</h2>
+              <salla-custom-component component-name="${name}"></salla-custom-component>
+            </div>
+          `)
+            .join('')}
+        </div>
       </div>
     </main>
     <script>
+      const translations = ${JSON.stringify(translations)};
       const toggleTheme = document.getElementById('toggleTheme');
       const toggleLang = document.getElementById('toggleLang');
-      let currentLang = 'ar';
-      let currentTheme = 'light';
+      
+      // Get stored preferences or use defaults
+      let currentLang = localStorage.getItem('salla_demo_lang') || 'ar';
+      let currentTheme = localStorage.getItem('salla_demo_theme') || 'light';
 
-      // Initialize theme
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      toggleTheme.addEventListener('click', () => {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-      });
-
-      toggleLang.addEventListener('click', () => {
-        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      // Function to update language
+      function updateLanguage(lang) {
+        currentLang = lang;
         const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.setAttribute('lang', currentLang);
         document.documentElement.setAttribute('dir', dir);
+        localStorage.setItem('salla_demo_lang', currentLang);
+        
+        // Update language code and title
+        const langCode = toggleLang.querySelector('.lang-code');
+        const pageTitle = document.getElementById('pageTitle');
+        langCode.textContent = currentLang === 'ar' ? 'EN' : 'AR';
+        pageTitle.textContent = translations[currentLang].title;
+      }
+
+      // Function to update theme
+      function updateTheme(theme) {
+        currentTheme = theme;
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('salla_demo_theme', currentTheme);
+      }
+
+      // Initialize with stored or default values
+      updateLanguage(currentLang);
+      updateTheme(currentTheme);
+
+      // Event listeners
+      toggleTheme.addEventListener('click', () => {
+        updateTheme(currentTheme === 'light' ? 'dark' : 'light');
+      });
+
+      toggleLang.addEventListener('click', () => {
+        updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
     </script>
     <script type="module">
