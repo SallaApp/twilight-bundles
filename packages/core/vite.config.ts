@@ -14,14 +14,19 @@ export default defineConfig({
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-        external: [/^lit/, 'fs', 'path', 'glob'],
+        external: [
+        //    /^lit/,
+            'fs',
+            'path',
+            'glob'
+        ],
         output: {
             globals: {
                 lit: 'lit',
                 'lit-element': 'litElement',
                 'lit-html': 'litHtml',
             },
-            sourcemap: true,
+            // sourcemap: true,
             dir: 'dist',    
         },
     }
