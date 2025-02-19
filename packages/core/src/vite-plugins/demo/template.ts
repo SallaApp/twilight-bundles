@@ -1,7 +1,7 @@
 export function createDemoHTML(componentFiles: Record<string, string>) {
   const translations = {
     ar: {
-      toggleTheme: 'تبديل المظهر',
+      toggleTheme: 'تغيير المظهر',
       toggleLang: 'English',
       dir: 'rtl',
       lang: 'ar',
@@ -9,7 +9,7 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
     },
     en: {
       toggleTheme: 'Toggle Theme',
-      toggleLang: 'العربية',
+      toggleLang: 'Arabic',
       dir: 'ltr',
       lang: 'en',
       title: 'Twilight Bundles'
@@ -279,9 +279,6 @@ export function createDemoHTML(componentFiles: Record<string, string>) {
       toggleLang.addEventListener('click', () => {
         updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
-    </script>
-    <script type="module">
-      ${Object.entries(componentFiles).map(([, path]) => `import '${path}';`).join('\n        ')}
     </script>
   </body>
 </html>`
