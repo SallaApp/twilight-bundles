@@ -1,85 +1,89 @@
-# @salla.sa/twilight-bundles
+# @salla.sa/twilight-bundles-core
 
-Core package for building and developing custom Salla components using Lit.
+Core build tools and plugins for Salla Twilight components. This package provides the build infrastructure used by the starter kit and other Twilight component packages.
 
 ## Features
 
-- **Vite Plugins**: A collection of plugins to streamline component development
-  - `sallaBuildPlugin`: Handles bundling and optimization of components
-  - `sallaDemoPlugin`: Provides a development server with hot reloading
-  - `sallaTransformPlugin`: Automatically registers components with proper naming
+- **Vite Plugins**: A set of plugins for building and developing Twilight components
+- **Build Configuration**: Optimized build settings for component bundling
+- **Development Tools**: Development server and demo environment
 
-- **Base Components**: Foundational components and utilities
-  - `SallaBaseComponent`: Base class for all Salla components with shared functionality
+## Plugins
 
-## Installation
+### 1. Transform Plugin (`sallaTransformPlugin`)
 
-```bash
-pnpm add @salla.sa/twilight-bundles
-```
-
-## Usage
-
-1. Import and use the Vite plugins in your `vite.config.ts`:
+Transforms component files to ensure proper naming and registration in the Twilight system.
 
 ```typescript
-import { defineConfig } from 'vite';
-import { 
-  sallaBuildPlugin, 
-  sallaDemoPlugin,
-  sallaTransformPlugin 
-} from '@salla.sa/twilight-bundles/vite-plugins';
+import { sallaTransformPlugin } from '@salla.sa/twilight-bundles-core';
 
 export default defineConfig({
   plugins: [
-    // Transform plugin for component registration
-    sallaTransformPlugin(),
-    
-    // Build plugin for bundling and optimization
-    sallaBuildPlugin({
-      outDir: 'dist',
-      componentsGlob: 'src/components/*/index.ts'
-    }),
-    
-    // Demo plugin for development server
-    sallaDemoPlugin({
-      port: 5173,
-      host: 'localhost'
-    })
+    sallaTransformPlugin()
   ]
 });
 ```
 
-2. Extend `SallaBaseComponent` in your components:
+The transform plugin:
+- Matches components in `src/components/*/index.ts`
+- Ensures proper component registration
+- Handles component naming based on directory structure
+
+### 2. Build Plugin (`sallaBuildPlugin`)
+
+Handles component bundling and output configuration.
 
 ```typescript
-import { SallaBaseComponent } from '@salla.sa/twilight-bundles';
+import { sallaBuildPlugin } from '@salla.sa/twilight-bundles-core';
 
-export class MyComponent extends SallaBaseComponent {
-  // Your component code here
-}
+export default defineConfig({
+  plugins: [
+    sallaBuildPlugin()
+  ]
+});
 ```
+
+The build plugin:
+- Automatically discovers components in `src/components/`
+- Creates individual files for each component
+- Configures external dependencies (lit libraries)
+- Optimizes build output
+
+### 3. Demo Plugin (`sallaDemoPlugin`)
+
+Provides a development environment for testing components.
+
+```typescript
+import { sallaDemoPlugin } from '@salla.sa/twilight-bundles-core';
+
+export default defineConfig({
+  plugins: [
+    sallaDemoPlugin()
+  ]
+});
+```
+
+The demo plugin:
+- Creates a demo page with all components
+- Configures hot module reloading
+- Sets up the development server
+- Provides a testing environment
+
+## Usage
+
+This package is typically used as a dependency in Twilight component packages. See the starter kit for a complete example of how to use these plugins.
 
 ## Development
 
-This package is intentionally kept minimal to focus on the core functionality needed for component development. While testing is important for production components, we've omitted it here to keep the setup simple and easy to understand.
+1. Install dependencies:
+```bash
+pnpm install
+```
 
-### Future Improvements
-
-1. **Testing**: Add comprehensive test suite
-   - Unit tests for plugins and base components
-   - Integration tests for component lifecycle
-   - E2E tests for development workflow
-
-2. **Documentation**: Expand documentation
-   - API reference
-   - Plugin configuration options
-   - Best practices and examples
-
-3. **Features**:
-   - Component scaffolding tools
-   - Performance optimization utilities
-   - Development tools and debugging helpers
+2. Build the package:
+```bash
+pnpm run build
+```
 
 ## License
 

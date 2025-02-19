@@ -1,103 +1,98 @@
-# @salla.sa/twilight-bundles-starter-kit
+# Salla Twilight Bundles Starter Kit
 
-A minimal starter kit for building custom Salla components using Lit.
-
-## Features
-
-- **Vite**: Fast development with HMR and optimized builds
-- **Lit**: Modern, lightweight web components
-- **TypeScript**: Type-safe component development
-- **ESLint & Prettier**: Code quality and formatting
-- **Import Maps**: CDN-based dependency management
+This starter kit provides a foundation for building custom Twilight components for Salla's e-commerce platform. It includes a pre-configured build setup and development environment to help you get started quickly.
 
 ## Getting Started
 
-1. Clone and install dependencies:
-
-```bash
-# Clone the repository
-git clone https://github.com/SallaApp/twilight-bundles.git
-
-# Navigate to starter-kit
-cd twilight-bundles/packages/starter-kit
-
-# Install dependencies
-pnpm install
-```
-
-2. Start development:
-
-```bash
-pnpm dev
-```
-
-3. Build for production:
-
-```bash
-pnpm build
-```
+1. Clone this repository
+2. Remove the example components in `src/components/`
+3. Create your own components in the `src/components/` directory
+4. Run `pnpm install` to install dependencies
+5. Run `pnpm run dev` to start the development server
+6. Run `pnpm run build` to build your components for production
 
 ## Project Structure
 
 ```
 src/
-├── components/         # Your custom components
-│   ├── product-card/  # Example component
-│   │   └── index.ts
-│   └── table-list/    # Example component
-│       └── index.ts
-└── types/             # TypeScript type definitions
-    └── index.ts
+  components/
+    your-component-name/
+      index.ts        # Main component file
+      styles.ts       # Component styles (optional)
+      types.ts        # Component types (optional)
 ```
 
-## Creating Components
+## Built-in Plugins
 
-1. Create a new component directory:
+This starter kit includes three Vite plugins that handle the build process:
 
-```bash
-mkdir src/components/my-component
-```
+### 1. Transform Plugin (`sallaTransformPlugin`)
+- Transforms component files to ensure proper naming and registration
+- Matches components in `src/components/*/index.ts`
+- To disable: Remove from `vite.config.ts` plugins array
 
-2. Create your component:
+### 2. Build Plugin (`sallaBuildPlugin`)
+- Handles component bundling and output
+- Creates individual files for each component in `dist/`
+- Configures external dependencies (lit libraries)
+- To customize: Remove from plugins array and configure your own build settings:
+  ```typescript
+  {
+    build: {
+      lib: {
+        entry: {/* your entries */},
+        formats: ['es'],
+        fileName: (format, entryName) => `${entryName}.js`
+      },
+      rollupOptions: {
+        external: [/^lit/],
+        output: {/* your output config */}
+      }
+    }
+  }
+  ```
 
+### 3. Demo Plugin (`sallaDemoPlugin`)
+- Provides a development environment for testing components
+- Creates a demo page with your components
+- Configures hot module reloading
+- To disable: Remove from plugins array and set up your own dev server
+
+## Component Requirements
+
+Each component should:
+1. Be a class that extends `LitElement`
+2. Export the class as default
+3. Be placed in its own directory under `src/components/`
+4. Have an `index.ts` as the entry point
+
+Example:
 ```typescript
-// src/components/my-component/index.ts
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-export class MyComponent extends LitElement {
-    @property({ type: Object }) settings: {name: string} = { name: 'Default Name'};
+export default class MyComponent extends LitElement {
+  @property({ type: String })
+  name = 'World';
+
+  static styles = css`/* your styles */`;
 
   render() {
-    return html`
-      <div>
-        <h1>Hello, ${this.settings.name}!</h1>
-      </div>
-    `;
+    return html`<div>Hello ${this.name}!</div>`;
   }
 }
 ```
 
-## Development Notes
+## Building for Production
 
-This starter kit is intentionally minimal to help you get started quickly. While testing is important for production components, we've omitted it here to keep the setup simple and focused on the basics.
+Run `pnpm run build` to create production-ready bundles in the `dist/` directory. Each component will have its own file named after the component (e.g., `my-component.js`).
 
-### Future Improvements
+## Development
 
-1. **Testing**: Add testing infrastructure
-   - Unit tests with Vitest
-   - Component testing with Testing Library
-   - E2E tests with Playwright
-
-2. **Documentation**: Add comprehensive docs
-   - Component API documentation
-   - Usage examples
-   - Best practices
-
-3. **Features**:
-   - Storybook integration
-   - Visual regression testing
-   - Performance monitoring
+Run `pnpm run dev` to start the development server. This will:
+1. Create a demo page with all your components
+2. Enable hot module reloading
+3. Provide a development environment for testing
 
 ## License
 

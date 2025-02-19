@@ -1,50 +1,66 @@
-# Salla Twilight Bundles Monorepo
+# Salla Twilight Bundles
 
-This monorepo contains the core SDK and starter kit for building custom Salla components using Twilight Bundles.
-
-## Repository Structure
-
-```
-@salla.sa/twilight-bundles/
-├── packages/
-│   ├── core/             # Core SDK package
-│   └── starter-kit/      # Template project for new components
-```
+A monorepo for building and developing custom Twilight components for Salla's e-commerce platform.
 
 ## Packages
 
-### Core (@salla.sa/twilight-bundles)
-The core SDK package provides the foundation for building custom Salla components. It includes:
-- Core utilities and base classes
-- Vite plugin for bundle building
-- Type definitions and interfaces
+### 1. Core (`@salla.sa/twilight-bundles-core`)
+The core package provides build tools and plugins for Twilight components:
+- Vite plugins for building and development
+- Build configuration and optimization
+- Development server and demo environment
 
-### Starter Kit (@salla.sa/twilight-bundles-starter-kit)
-A template project that helps you get started with building custom Salla components. It includes:
-- Project structure and configuration
-- Example components
-- Testing setup
+[Learn more about the core package](packages/core/README.md)
+
+### 2. Starter Kit (`@salla.sa/twilight-bundles-starter-kit`)
+A template for creating new Twilight component packages:
+- Pre-configured build setup
 - Development environment
+- Example components
+- Best practices and conventions
 
-## Development
+[Learn more about the starter kit](packages/starter-kit/README.md)
 
-### Prerequisites
-- Node.js >= 16.0.0
-- pnpm >= 9.0.0
+## Getting Started
 
-### Setup
-1. Clone the repository
+1. Clone this repository:
+```bash
+git clone https://github.com/SallaApp/twilight-bundles.git
+cd twilight-bundles
+```
+
 2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+```bash
+pnpm install
+```
 
-### Common Commands
-- `pnpm dev`: Start development mode for all packages
-- `pnpm build`: Build all packages
-- `pnpm test`: Run tests for all packages
-- `pnpm lint`: Run linting for all packages
-- `pnpm format`: Format code in all packages
+3. Choose your path:
+   - To create new components: Use the starter kit
+   - To contribute to build tools: Work with the core package
+
+## Development Workflow
+
+1. **Creating Components**
+   - Start with the starter kit
+   - Remove example components
+   - Create your components in `src/components/`
+   - Follow the component requirements
+
+2. **Building**
+   - Run `pnpm run build` to create production bundles
+   - Each component gets its own output file
+   - Files are optimized for production
+
+3. **Development**
+   - Run `pnpm run dev` for development
+   - Use the demo environment
+   - Hot module reloading enabled
+   - Test your components in real-time
+
+## Contributing
+
+We welcome contributions! Please read our contributing guidelines before submitting pull requests.
 
 ## License
+
 MIT
