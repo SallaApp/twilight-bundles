@@ -14,7 +14,16 @@ export default defineConfig({
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-      external: ['lit', 'lit-element', 'lit-html', 'fs', 'path']
+        external: [/^lit/, 'fs', 'path', 'glob'],
+        output: {
+            globals: {
+                lit: 'lit',
+                'lit-element': 'litElement',
+                'lit-html': 'litHtml',
+            },
+            sourcemap: true,
+            dir: 'dist',    
+        },
     }
-  }
+  },
 });

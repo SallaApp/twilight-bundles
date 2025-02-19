@@ -10,7 +10,7 @@ interface BuildPluginOptions {
 function findComponentFiles(componentsGlob: string): string[] {
     const baseDir = process.cwd();
     const componentDir = resolve(baseDir, 'src/components');
-    
+
     if (!fs.existsSync(componentDir)) {
         return [];
     }
@@ -34,24 +34,29 @@ export function sallaBuildPlugin(options: BuildPluginOptions = {}): Plugin {
             return {
                 ...config,
                 build: {
-                    ...config.build,
+                    //todo:: make sure to output using component names
                     lib: {
                         entry: findComponentFiles(componentsGlob),
                         formats: ['es'],
-                        fileName: (format: string) => `[name].${format}.js`
+                        fileName: (_format, entryName) => `${entryName}.js`
                     },
+                    outDir,
+                    // emptyOutDir: false,
                     rollupOptions: {
-                        external: ['lit', 'lit-element', 'lit-html'],
+                        external: [/^lit/],
                         output: {
-                            dir: outDir,
-                            preserveModules: true,
-                            preserveModulesRoot: 'src'
+                            globals: {
+                                lit: 'lit',
+                                'lit-element': 'litElement',
+                                'lit-html': 'litHtml'
+                            },
                         }
-                    }
+                    },
+                    ...config.build,
                 },
                 optimizeDeps: {
+                    include: [...(config.optimizeDeps?.include || []), 'lit', 'lit-element', 'lit-html'],
                     ...config.optimizeDeps,
-                    include: [...(config.optimizeDeps?.include || []), 'lit', 'lit-element', 'lit-html']
                 }
             };
         }

@@ -7,7 +7,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    // "rootDir": "./src",
     "strict": true,
     "moduleResolution": "node",
     "baseUrl": "./",
@@ -15,7 +15,7 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "typeRoots": ["./src/types", "./node_modules/@types"],
+    // "typeRoots": ["./src/types", "./node_modules/@types"],
     "paths": {
       "lit": ["node_modules/lit"],
       "lit/*": ["node_modules/lit/*"]

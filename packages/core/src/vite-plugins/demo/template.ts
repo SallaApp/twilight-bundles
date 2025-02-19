@@ -26,7 +26,27 @@ export function createDemoHTML(componentFiles: string[]) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salla Components Demo</title>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "lit": "https://cdn.jsdelivr.net/npm/lit@3.1.0/index.js",
+        "lit/": "https://cdn.jsdelivr.net/npm/lit@3.1.0/",
+        "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3.1.0/lit-html.js",
+        "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3.1.0/",
+        "lit-html/is-server.js": "https://cdn.jsdelivr.net/npm/lit-html@3.1.0/is-server.js",
+        "lit-html/directives/": "https://cdn.jsdelivr.net/npm/lit-html@3.1.0/directives/",
+        "lit-element": "https://cdn.jsdelivr.net/npm/lit-element@4.0.0/lit-element.js",
+        "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4.0.0/",
+        "lit-element/lit-element.js": "https://cdn.jsdelivr.net/npm/lit-element@4.0.0/lit-element.js",
+        "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.0/reactive-element.js",
+        "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2.0.0/"
+      }
+    }
+    </script>
     <script>window.customComponents = ${JSON.stringify(componentFiles)};</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/lit@3.1.0/index.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/lit@3.1.0/decorators.js"></script>
     <script type="module" src="https://cdn.salla.network/js/twilight/2.14.65/twilight.esm.js"></script>
     <script type="module" src="http://localhost:5500/packages/core/dist/twilight-bundles.js" demo-mode></script>
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/pingarlt.css">

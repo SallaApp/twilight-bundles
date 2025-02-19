@@ -24,6 +24,7 @@ export default defineConfig({
     })
   ],
   server: {
+    // open: '/src/demo.html',
     watch: {
       usePolling: true,
       interval: 100

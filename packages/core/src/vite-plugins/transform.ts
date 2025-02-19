@@ -5,25 +5,26 @@ interface TransformPluginOptions {
 }
 
 function transformComponent(code: string, id: string, pattern: RegExp) {
-    const match = pattern.exec(id);
-
-    if (!match?.groups) {
+    const match = id.match(pattern);
+    if (!match) {
         return null;
     }
 
-    const { componentName } = match.groups;
-    const className = componentName
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('');
+    // Extract component name from the class definition
+    const classMatch = code.match(/class\s+(\w+)/i);
+    if (!classMatch) {
+        return null;
+    }
 
-    return {
-        code: `${code}
-            
-            // Auto-register the component
-            customElements.define('salla-${componentName}', ${className});`,
-        map: null
-    };
+    const className = classMatch[1];
+    // Extract component name with fallback to path-based extraction
+    const componentName = match.groups?.componentName || id.split('/')[id.split('/').indexOf('components') + 1];
+    const prefix = componentName.substring(0, 6).toLowerCase() === 'salla-' ? '' : 'salla-';
+
+    // Add component registration code
+    const transformedCode = `${code}
+if (typeof ${className} !== 'undefined') {${className}.registerSallaComponent('${prefix + componentName}');}`;
+    return { code: transformedCode };
 }
 
 export function sallaTransformPlugin(options: TransformPluginOptions = {}): Plugin {
