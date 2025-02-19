@@ -9,10 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write \"src/**/*.{ts,html,css}\"",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "format": "prettier --write \"src/**/*.{ts,html,css}\""
   },
   "keywords": [
     "salla",

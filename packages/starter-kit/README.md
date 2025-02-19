@@ -1,152 +1,104 @@
-# Salla Twilight Bundles Starter Kit
+# @salla.sa/twilight-bundles-starter-kit
 
-A starter kit for building custom Salla components using the `@salla.sa/twilight-bundles` package. This template provides everything you need to start developing beautiful, reusable components for Salla stores.
+A minimal starter kit for building custom Salla components using Lit.
 
 ## Features
 
-- 🚀 **Modern Stack**: Built with Vite, TypeScript, and Lit
-- 🎯 **Component Architecture**: Organized structure under `src/components/`
-- 🔥 **Hot Reload**: Instant feedback during development
-- 🎨 **Auto Registration**: Components auto-register with `salla-` prefix
-- 📦 **Optimized Builds**: Individual component builds with tree-shaking
-- 🧪 **Testing Ready**: Set up for unit testing with Vitest
+- **Vite**: Fast development with HMR and optimized builds
+- **Lit**: Modern, lightweight web components
+- **TypeScript**: Type-safe component development
+- **ESLint & Prettier**: Code quality and formatting
+- **Import Maps**: CDN-based dependency management
 
-## Quick Start
+## Getting Started
+
+1. Clone and install dependencies:
 
 ```bash
+# Clone the repository
+git clone https://github.com/SallaApp/twilight-bundles.git
+
+# Navigate to starter-kit
+cd twilight-bundles/packages/starter-kit
+
 # Install dependencies
 pnpm install
+```
 
-# Start development server
+2. Start development:
+
+```bash
 pnpm dev
+```
 
-# Build components
+3. Build for production:
+
+```bash
 pnpm build
 ```
 
 ## Project Structure
 
 ```
-.
-├── src/
-│   ├── components/           # Component directories
-│   │   ├── product-card/    # Example product card component
-│   │   │   └── index.ts
-│   │   └── table-list/      # Example table list component
-│   │       └── index.ts
-│   └── demo.html            # Development demo page
-├── dist/                    # Built components
-├── vite.config.ts          # Vite configuration
-└── tsconfig.json           # TypeScript configuration
+src/
+├── components/         # Your custom components
+│   ├── product-card/  # Example component
+│   │   └── index.ts
+│   └── table-list/    # Example component
+│       └── index.ts
+└── types/             # TypeScript type definitions
+    └── index.ts
 ```
 
-## Component Examples
+## Creating Components
 
-### Product Card Component
+1. Create a new component directory:
+
+```bash
+mkdir src/components/my-component
+```
+
+2. Create your component:
 
 ```typescript
+// src/components/my-component/index.ts
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-export default class ProductCard extends LitElement {
-    @property({ type: Object })
-    settings = {
-        title: 'Product Name',
-        price: '$99.99',
-        image: 'https://placehold.co/200x200',
-        discount: '-20%'
-    };
+export class MyComponent extends LitElement {
+    @property({ type: Object }) settings: {name: string} = { name: 'Default Name'};
 
-    static styles = css`
-        .product-card {
-            width: 250px;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+  render() {
+    return html`
+      <div>
+        <h1>Hello, ${this.settings.name}!</h1>
+      </div>
     `;
-
-    render() {
-        return html`
-            <div class="product-card">
-                <img src="${this.settings.image}" alt="${this.settings.title}">
-                <h3>${this.settings.title}</h3>
-                <div class="price">${this.settings.price}</div>
-            </div>
-        `;
-    }
+  }
 }
 ```
 
-### Using Components
+## Development Notes
 
-```html
-<!-- In your HTML -->
-<salla-custom-component 
-    component-name="product-card" 
-    settings='{
-        "title": "Awesome Product",
-        "price": "$129.99",
-        "image": "product.jpg",
-        "discount": "-20%"
-    }'
-></salla-custom-component>
+This starter kit is intentionally minimal to help you get started quickly. While testing is important for production components, we've omitted it here to keep the setup simple and focused on the basics.
 
-<salla-custom-component 
-    component-name="table-list" 
-    settings='{
-        "items": [
-            {
-                "id": 1,
-                "title": "List Item",
-                "description": "Item description"
-            }
-        ]
-    }'
-></salla-custom-component>
-```
+### Future Improvements
 
-## Development
+1. **Testing**: Add testing infrastructure
+   - Unit tests with Vitest
+   - Component testing with Testing Library
+   - E2E tests with Playwright
 
-### Starting the Dev Server
+2. **Documentation**: Add comprehensive docs
+   - Component API documentation
+   - Usage examples
+   - Best practices
 
-```bash
-pnpm dev
-```
-
-This will:
-1. Start the Vite dev server
-2. Open the demo page in your browser
-3. Enable hot module replacement
-4. Auto-register your components
-
-### Building Components
-
-```bash
-pnpm build
-```
-
-This will:
-1. Compile TypeScript
-2. Bundle components
-3. Generate optimized builds
-4. Output to `dist/` directory
-
-## Testing
-
-```bash
-# Run tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-```
-
-## Requirements
-
-- Node.js >= 16.0.0
-- pnpm >= 9.0.0
+3. **Features**:
+   - Storybook integration
+   - Visual regression testing
+   - Performance monitoring
 
 ## License
 
-MIT 
+MIT

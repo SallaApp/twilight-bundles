@@ -7,7 +7,7 @@ interface BuildPluginOptions {
     outDir?: string;
 }
 
-function findComponentFiles(componentsGlob: string): string[] {
+export function findComponentFiles(componentsGlob: string): string[] {
     const baseDir = process.cwd();
     const componentDir = resolve(baseDir, 'src/components');
 
