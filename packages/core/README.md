@@ -15,7 +15,7 @@ Core build tools and plugins for Salla Twilight components. This package provide
 Transforms component files to ensure proper naming and registration in the Twilight system.
 
 ```typescript
-import { sallaTransformPlugin } from '@salla.sa/twilight-bundles-core';
+import { sallaTransformPlugin } from '@salla.sa/twilight-bundles-core/vite-plugins';
 
 export default defineConfig({
   plugins: [
@@ -34,7 +34,7 @@ The transform plugin:
 Handles component bundling and output configuration.
 
 ```typescript
-import { sallaBuildPlugin } from '@salla.sa/twilight-bundles-core';
+import { sallaBuildPlugin } from '@salla.sa/twilight-bundles-core/vite-plugins';
 
 export default defineConfig({
   plugins: [
@@ -54,7 +54,7 @@ The build plugin:
 Provides a development environment for testing components.
 
 ```typescript
-import { sallaDemoPlugin } from '@salla.sa/twilight-bundles-core';
+import { sallaDemoPlugin } from '@salla.sa/twilight-bundles-core/vite-plugins';
 
 export default defineConfig({
   plugins: [

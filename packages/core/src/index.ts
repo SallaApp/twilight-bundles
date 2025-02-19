@@ -96,7 +96,7 @@ class TwilightBundles {
         window.customElements.define(component.dynamicTagName, component.component);
 
         this.components.set(tagName, component);
-        Salla.log('Component registered:', component.dynamicTagName, component.component);
+        Salla.log('Component registered:', component.dynamicTagName);
 
         // Handle all pending components with the same tagName
         const pendingComponentsWithTag = this.pendingComponents.filter(pc => pc.tagName === tagName);
