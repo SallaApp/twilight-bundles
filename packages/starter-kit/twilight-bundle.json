@@ -1,10 +1,8 @@
 {
-    "$schema": "./twilight-bundle.schema.json",
     "name": {
         "ar": "حزمة مكونات سلة",
-        "en": "Salla Components Bundle"
+        "en": "Twilight Bundle"
     },
-    "version": "1.0.0",
     "description": {
         "ar": "حزمة مكونات قابلة لإعادة الاستخدام لبناء تجربة تسوق مميزة",
         "en": "A bundle of reusable components for building exceptional shopping experiences"
@@ -15,107 +13,41 @@
         "url": "https://salla.dev"
     },
     "repository": "https://github.com/SallaApp/twilight-bundles-starter-kit",
-    "license": "MIT",
     "components": [
         {
-            "name": {
-                "ar": "بطاقة المنتج",
-                "en": "Product Card"
-            },
-            "path": "product-card",
-            "icon": "sicon-box",
-            "preview": "assets/previews/product-card.png",
-            "settings": [
+            "title": "بطاقة منتج",
+            "icon": "sicon-album-photo",
+            "name": "product-card",
+            "image": "https://cdn.salla.network/images/themes/raed/preview-images/images-slider-enhancement.png?v=1.1",
+            "fields": [
                 {
-                    "type": "string",
-                    "id": "title",
-                    "label": {
-                        "ar": "عنوان المنتج",
-                        "en": "Product Title"
-                    },
-                    "default": "Product Name"
+                    "type": "static",
+                    "format": "description",
+                    "id": "static-desc",
+                    "value": "<div style='padding-top:10px;margin-bottom:30px;border:1px solid #ebebeb;border-radius:5px;text-align:center;overflow:hidden'><h6 style='margin-bottom:10px'>معاينة العنصر</h6><img class='w-full' src='https://cdn.salla.network/images/themes/raed/preview-images/images-slider-enhancement.png?v=1.1'></div>"
                 },
                 {
-                    "type": "string",
-                    "id": "price",
-                    "label": {
-                        "ar": "سعر المنتج",
-                        "en": "Product Price"
-                    },
-                    "default": "$99.99"
+                    "type": "static",
+                    "format": "description",
+                    "id": "static-note",
+                    "value": "<h4 style='color: #2377CD;font-size: 14px;margin:1rem 0px;background: #E9F0FD;padding: 10px 15px;border-radius: 4px;'>هذا العنصر غير مناسب لعرض البنرات، يمكنك استخدام عنصر <strong>صور متحركة</strong> بدلاً من عنصر <strong>صور متحركة محسنة</strong> لتظهر صورة البنر بشكل كامل</h4>"
                 },
                 {
-                    "type": "string",
-                    "id": "image",
-                    "label": {
-                        "ar": "صورة المنتج",
-                        "en": "Product Image"
-                    },
-                    "validation": {
-                        "pattern": "^https?://.*|^/.*"
-                    }
-                },
-                {
-                    "type": "string",
-                    "id": "discount",
-                    "label": {
-                        "ar": "نسبة الخصم",
-                        "en": "Discount Percentage"
-                    },
-                    "description": {
-                        "ar": "مثال: -30%",
-                        "en": "Example: -30%"
-                    }
+                    "id": "product",
+                    "icon": "sicon-keyboard_arrow_down",
+                    "type": "items",
+                    "label": "اختر المنتج",
+                    "placeholder": "البحث في قائمة المنتجات...",
+                    "format": "dropdown-list",
+                    "source": "products",
+                    "options": [],
+                    "required": true,
+                    "selected": [],
+                    "maxLength": 1,
+                    "searchable": true,
+                    "multichoice": false
                 }
-            ],
-            "dependencies": [],
-            "tags": ["product", "card", "ui"]
-        },
-        {
-            "name": {
-                "ar": "قائمة الجدول",
-                "en": "Table List"
-            },
-            "path": "table-list",
-            "icon": "sicon-list-ul",
-            "preview": "assets/previews/table-list.png",
-            "settings": [
-                {
-                    "type": "array",
-                    "id": "items",
-                    "label": {
-                        "ar": "عناصر القائمة",
-                        "en": "List Items"
-                    },
-                    "default": [],
-                    "validation": {
-                        "min": 0
-                    }
-                },
-                {
-                    "type": "object",
-                    "id": "item_template",
-                    "label": {
-                        "ar": "نموذج العنصر",
-                        "en": "Item Template"
-                    },
-                    "properties": {
-                        "id": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "title": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "description": {
-                            "type": "string"
-                        }
-                    }
-                }
-            ],
-            "dependencies": [],
-            "tags": ["list", "table", "ui"]
+            ]
         }
     ]
 }
