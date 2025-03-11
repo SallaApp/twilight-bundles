@@ -1,3 +1,5 @@
+const bundlesUrl = process.env.TWILIGHT_BUNDLES_URL || 'https://cdn.assets.salla.network/latest/twilight-bundles.js';
+
 export interface DemoTemplateOptions {
   grid: {
     columns: string;
@@ -35,8 +37,8 @@ export function createDemoHTML(componentFiles: Record<string, string>, options: 
     <script>window.customComponents = ${JSON.stringify(Object.values(componentFiles))};</script>
     <link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://cdn.salla.network/images/logo/logo-square.png" />
     <link rel="icon" type="image/png" media="(prefers-color-scheme: dark)" href="https://cdn.salla.network/images/logo/logo-light-square.png" />
-    <script type="module" src="https://cdn.salla.network/js/twilight/2.14.65/twilight.esm.js"></script>
-    <script type="module" src="http://localhost:5500/packages/core/dist/twilight-bundles.js" demo-mode></script>
+    <script type="module" src="https://cdn.salla.network/js/twilight/latest/twilight.esm.js" async></script>
+    <script type="module" src="${bundlesUrl}" demo-mode defer></script>
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/pingarlt.css">
     <style>
       :root {

@@ -43,19 +43,20 @@ pnpm install
 1. **Creating Components**
    - Start with the starter kit
    - Remove example components
-   - Create your components in `src/components/`
+   - Create your components in `packages/starter-kit/src/components/`
    - Follow the component requirements
 
-2. **Building**
-   - Run `pnpm run build` to create production bundles
-   - Each component gets its own output file
-   - Files are optimized for production
-
-3. **Development**
+2. **Development**
    - Run `pnpm run dev` for development
    - Use the demo environment
    - Hot module reloading enabled
    - Test your components in real-time
+   - PS: You can serve the bundles dist `packages/core/dist/twilight-bundles.js` by your vs editor or any way then pass it via env something like `TWILIGHT_BUNDLES_URL=http://127.0.0.1:5500/packages/core/dist/twilight-bundles.js pnpm dev` if you are using go live feature on windsurf editor
+
+3. **Building**
+   - Run `pnpm run build` to create production bundles
+   - Each component gets its own output file
+   - Files are optimized for production
 
 ## Contributing
 
