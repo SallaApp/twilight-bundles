@@ -65,3 +65,7 @@ We welcome contributions! Please read our contributing guidelines before submitt
 ## License
 
 MIT
+
+## TODO
+
+- Support building a light version without lit and common scripts dependencies to reduce bundle size
