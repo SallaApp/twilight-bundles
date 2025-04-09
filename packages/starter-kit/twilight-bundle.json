@@ -1,10 +1,10 @@
 {
     "name": {
-        "ar": "حزمة مكونات سلة",
+        "ar": "حزمة عناصر سلة",
         "en": "Twilight Bundle"
     },
     "description": {
-        "ar": "حزمة مكونات قابلة لإعادة الاستخدام لبناء تجربة تسوق مميزة",
+        "ar": "حزمة عناصر قابلة لإعادة الاستخدام لبناء تجربة تسوق مميزة",
         "en": "A bundle of reusable components for building exceptional shopping experiences"
     },
     "author": {
@@ -18,7 +18,8 @@
             "title": "بطاقة منتج",
             "icon": "sicon-album-photo",
             "name": "product-card",
-            "image": "https://cdn.salla.network/images/themes/raed/preview-images/images-slider-enhancement.png?v=1.1",
+            "key": "0d1f3b8e-6a2c-4f5d-9e7b-8c1a2b3d4e5f",
+            "image": "https://cdn.salla.network/images/themes/raed/preview-images/images-slider-enhancement.png",
             "fields": [
                 {
                     "type": "static",
@@ -46,6 +47,83 @@
                     "maxLength": 1,
                     "searchable": true,
                     "multichoice": false
+                }
+            ]
+        },
+        {
+            "title": "جدول محتوى بسيط",
+            "icon": "sicon-layout-grid-rearrange",
+            "name": "table-list",
+            "image": "https://cdn.salla.network/images/themes/raed/main-links-with-bg.jpg",
+            "key": "9f8e7d6c-5b4a-3c2d-1e0f-a9b8c7d6e5f4",
+            "fields": [
+                {
+                    "id": "items",
+                    "type": "collection",
+                    "format": "collection",
+                    "required": true,
+                    "minLength": 3,
+                    "maxLength": 100,
+                    "item_label": "صفوف الجدول",
+                    "value": [
+                        {
+                            "links.icon": "sicon-packed-box",
+                            "links.title": "منتج جاهز",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-fabric-swatch",
+                            "links.title": "خدمة حسب الطلب",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-cake",
+                            "links.title": "أكل ومشروبات",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-game-controller-alt",
+                            "links.title": "منتج رقمي",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-barcode-scan",
+                            "links.title": "بطاقة رقمية",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-inbox-full",
+                            "links.title": "مجموعة منتجات",
+                            "links.url__type": "offers_link"
+                        },
+                        {
+                            "links.icon": "sicon-calendar-date",
+                            "links.title": "حجوزات",
+                            "links.url__type": "offers_link"
+                        }
+                    ],
+                    "fields": [
+                        {
+                            "type": "string",
+                            "icon": "sicon-format-text-alt",
+                            "multilanguage": true,
+                            "id": "items.title",
+                            "required": true,
+                            "format": "text",
+                            "placeholder": "أدخل عنوان الصف هنا...",
+                            "minLength": 1,
+                            "maxLength": 100
+                        },
+                        {
+                            "type": "string",
+                            "icon": "sicon-format-text-alt",
+                            "multilanguage": true,
+                            "id": "items.description",
+                            "format": "textarea",
+                            "placeholder": "أدخل وصف الصف هنا...",
+                            "maxLength": 1000
+                        }
+                    ]
                 }
             ]
         }

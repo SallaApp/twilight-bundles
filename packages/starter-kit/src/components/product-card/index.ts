@@ -7,7 +7,7 @@ declare global {
 
 export default class ProductCard extends LitElement {
     @property({ type: Object })
-    settings: {
+    config: {
         title: string,
         price: string,
         image: string,
@@ -75,22 +75,22 @@ export default class ProductCard extends LitElement {
 
     private handleAddToCart() {
         Salla.log('Adding to cart:', {
-            product: this.settings.title,
-            price: this.settings.price
+            product: this.config.title,
+            price: this.config.price
         });
         
         // Show a simple notification
-        Salla.success(`Added ${this.settings.title} to cart!`);
+        Salla.success(`Added ${this.config.title} to cart!`);
     }
 
     render() {
         return html`
             <div class="product-card">
-                <img class="product-image" src="${this.settings.image}" alt="${this.settings.title}">
-                <h3 class="product-title">${this.settings.title}</h3>
+                <img class="product-image" src="${this.config.image}" alt="${this.config.title}">
+                <h3 class="product-title">${this.config.title}</h3>
                 <div>
-                    <span class="price-tag">${this.settings.price}</span>
-                    ${this.settings.discount ? html`<span class="discount">${this.settings.discount}</span>` : ''}
+                    <span class="price-tag">${this.config.price}</span>
+                    ${this.config.discount ? html`<span class="discount">${this.config.discount}</span>` : ''}
                 </div>
                 <button class="add-to-cart" @click="${this.handleAddToCart}">
                     Add to Cart

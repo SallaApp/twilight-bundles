@@ -3,7 +3,7 @@ import { property } from 'lit/decorators.js';
 
 export default class TableList extends LitElement {
     @property({ type: Object })
-    settings: {
+    config: {
         items: Array<{
             id: string | number;
             title: string;
@@ -60,7 +60,7 @@ export default class TableList extends LitElement {
     render() {
         return html`
             <div class="table-list">
-                ${this.settings.items.map(item => html`
+                ${this.config.items.map(item => html`
                     <div class="table-item">
                         <div class="item-content">
                             <h3 class="item-title">${item.title}</h3>
