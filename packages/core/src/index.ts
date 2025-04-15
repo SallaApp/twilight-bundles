@@ -45,7 +45,6 @@ class TwilightBundles {
             });
         };
         window.customComponents?.forEach(path => {
-            console.log(path);
             const script = document.createElement('script');
             script.type = 'module';
             script.src = path;
@@ -59,6 +58,7 @@ class TwilightBundles {
      */
     renderCustomComponentDom(tagName: string, component: HTMLElement) {
         salla.log('Rendering custom component', tagName);
+        component.getAttribute('component-name');
         const existingComponent = this.components.get(tagName);
 
         if (!existingComponent) {
