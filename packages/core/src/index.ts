@@ -1,20 +1,11 @@
-// import 'systemjs';
 import SallaComponent from './components/salla-base-component';
 import Helpers from './helpers/helpers';
 import SallaCustomComponent from './components/salla-custom-component';
 
-interface ComponentSchema {
-    id: string;
-    key: string;
-    name: string;
-    data?: Record<string, any>;
-}
-
-export class TwilightBundles {
+class TwilightBundles {
     private components: Map<string, { dynamicTagName: string, component?: typeof SallaComponent }> = new Map();
     private pendingComponents: { tagName: string, component: HTMLElement }[] = [];
     private initialized: boolean = false;
-    private importMap: Record<string, string> = {};
 
     constructor() {
         Salla.onReady()
@@ -54,7 +45,6 @@ export class TwilightBundles {
             });
         };
         window.customComponents?.forEach(path => {
-            console.log(path);
             const script = document.createElement('script');
             script.type = 'module';
             script.src = path;
@@ -68,6 +58,7 @@ export class TwilightBundles {
      */
     renderCustomComponentDom(tagName: string, component: HTMLElement) {
         salla.log('Rendering custom component', tagName);
+        component.getAttribute('component-name');
         const existingComponent = this.components.get(tagName);
 
         if (!existingComponent) {
@@ -105,7 +96,7 @@ export class TwilightBundles {
         window.customElements.define(component.dynamicTagName, component.component);
 
         this.components.set(tagName, component);
-        Salla.log('Component registered:', component.dynamicTagName, component.component);
+        Salla.log('Component registered:', component.dynamicTagName);
 
         // Handle all pending components with the same tagName
         const pendingComponentsWithTag = this.pendingComponents.filter(pc => pc.tagName === tagName);

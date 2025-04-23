@@ -1,172 +1,71 @@
-# @salla.sa/twilight-bundles
+# Salla Twilight Bundles
 
-A powerful SDK for developing custom web components for the Salla platform. This package provides the core functionality and tools needed to create, test, and build Salla-compatible web components.
+A monorepo for building and developing custom Twilight components for Salla's e-commerce platform.
 
-## Features
+## Packages
 
-- **Base Components**: Ready-to-use base components with Salla integration
-- **Vite Plugin**: Automated component processing and registration
-- **Custom Component Wrapper**: Easy integration with Salla's component system
-- **Development Tools**: Built-in utilities for development and testing
-- **Build System**: Optimized component bundling for production
+### 1. Core (`@salla.sa/twilight-bundles`)
+The core package provides build tools and plugins for Twilight components:
+- Vite plugins for building and development
+- Build configuration and optimization
+- Development server and demo environment
 
-## Installation
+[Learn more about the core package](packages/core/README.md)
 
+### 2. Starter Kit (`@salla.sa/twilight-bundles-starter-kit`)
+A template for creating new Twilight component packages:
+- Pre-configured build setup
+- Development environment
+- Example components
+- Best practices and conventions
+
+[Learn more about the starter kit](packages/starter-kit/README.md)
+
+## Getting Started
+
+1. Clone this repository:
 ```bash
-pnpm add @salla.sa/twilight-bundles
+git clone https://github.com/SallaApp/twilight-bundles.git
+cd twilight-bundles
 ```
 
-## Core Components
-
-### SallaBaseComponent
-
-Base class for creating Salla-compatible web components:
-
-```typescript
-import { SallaBaseComponent } from '@salla.sa/twilight-bundles';
-
-export class MyComponent extends SallaBaseComponent {
-    static properties = {
-        settings: { type: Object }
-    };
-}
+2. Install dependencies:
+```bash
+pnpm install
 ```
 
-### SallaCustomComponent
+3. Choose your path:
+   - To create new components: Use the starter kit
+   - To contribute to build tools: Work with the core package
 
-Wrapper component that loads and renders custom components:
+## Development Workflow
 
-```html
-<salla-custom-component 
-    component-name="my-component" 
-    settings='{"prop": "value"}'
-></salla-custom-component>
-```
-
-## Vite Plugin
-
-The package includes a Vite plugin for processing Salla components:
-
-```typescript
-import sallaComponentPlugin from '@salla.sa/twilight-bundles/vite-plugin';
-
-export default defineConfig({
-  plugins: [
-    sallaComponentPlugin({
-      // Custom pattern for matching component files
-      pattern: /^.*\/(?<componentDir>components)\/(?<componentName>[^/]+)\/index\.ts$/
-    })
-  ]
-});
-```
-
-### Plugin Features
-
-1. **Automatic Component Detection**:
-   - Uses named capture groups to identify components
-   - `componentDir`: Matches the components directory
-   - `componentName`: Extracts the component name from folder
-
-2. **Component Registration**:
-   - Automatically adds the `salla-` prefix
-   - Handles component registration code
-   - Ensures unique component names
-
-3. **Build Integration**:
-   - Processes component files during build
-   - Optimizes for production
-   - Handles dependencies correctly
-
-## Development Mode
-
-The package provides development utilities:
-
-```typescript
-// Enable demo mode
-<script type="module" src="node_modules/@salla.sa/twilight-bundles/dist/twilight-bundles.js" demo-mode></script>
-
-// Configure components
-window.customComponents = ['/src/components/my-component/index.ts'];
-```
-
-## Component Structure
-
-Components should follow this structure:
-```
-src/
-  components/
-    my-component/
-      index.ts         # Main component file
-```
-
-## API Reference
-
-### SallaBaseComponent
-
-Base component class with built-in features:
-
-- `settings`: Component configuration object
-- `registerSallaComponent()`: Register component with Salla
-- `connectedCallback()`: Lifecycle hook for initialization
-- `updated()`: Lifecycle hook for updates
-
-### Vite Plugin Options
-
-```typescript
-interface PluginOptions {
-  pattern?: RegExp;  // Custom pattern for component detection
-}
-```
-
-### Global Utilities
-
-Available through the global `Salla` object:
-
-```typescript
-Salla.onReady(() => {
-  // Initialize after Salla is ready
-});
-
-Salla.log('message');      // Logging
-Salla.success('message');  // Success notification
-Salla.error('message');    // Error notification
-```
-
-## Best Practices
-
-1. **Component Organization**
-   - Use folder-based component structure
-   - Follow naming conventions (`salla-` prefix)
-   - Keep components focused and isolated
+1. **Creating Components**
+   - Start with the starter kit
+   - Remove example components
+   - Create your components in `packages/starter-kit/src/components/`
+   - Follow the component requirements
 
 2. **Development**
-   - Use TypeScript for type safety
-   - Test in demo mode before production
-   - Handle component lifecycle properly
+   - Run `pnpm run dev` for development
+   - Use the demo environment
+   - Hot module reloading enabled
+   - Test your components in real-time
+   - PS: You can serve the bundles dist `packages/core/dist/twilight-bundles.js` by your vs editor or any way then pass it via env something like `TWILIGHT_BUNDLES_URL=http://127.0.0.1:5500/packages/core/dist/twilight-bundles.js pnpm dev` if you are using go live feature on windsurf editor
 
 3. **Building**
-   - Use the provided Vite plugin
-   - Follow the recommended build setup
-   - Test built components before deployment
+   - Run `pnpm run build` to create production bundles
+   - Each component gets its own output file
+   - Files are optimized for production
 
-## Integration
+## Contributing
 
-Components built with this package can be:
-1. Used directly in Salla stores
-2. Integrated with Salla's component system
-3. Loaded dynamically through the component loader
-
-## Requirements
-
-- Node.js >= 16.0.0
-- pnpm >= 9.0.0 (recommended)
+We welcome contributions! Please read our contributing guidelines before submitting pull requests.
 
 ## License
 
 MIT
 
-## Support
+## TODO
 
-For support and documentation:
-- [Salla Documentation](https://docs.salla.dev)
-- [Component Development Guide](https://docs.salla.dev/components)
+- Support building a light version without lit and common scripts dependencies to reduce bundle size
