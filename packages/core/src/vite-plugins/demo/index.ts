@@ -38,7 +38,7 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
             const componentFiles = findComponentFiles();
             
             // Filter components if options.components is provided
-            const filteredComponents = options.components 
+            let filteredComponents = options.components 
                 ? Object.fromEntries(
                     Object.entries(componentFiles)
                         .filter(([name]) => options.components!.includes(name))
@@ -47,6 +47,12 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
 
             const demoBasePath = '.salla-temp'
             const tempDir = path.resolve(process.cwd(), 'node_modules', demoBasePath);
+            if(config.server?.port){
+                filteredComponents = Object.fromEntries(
+                    Object.entries(filteredComponents)
+                        .map(([name, path]) => [name, path.replace(process.cwd(), `http://localhost:${config.server?.port}`)])
+                );
+            }
 
             // Create temp directory if it doesn't exist
             if (!fs.existsSync(tempDir)) {

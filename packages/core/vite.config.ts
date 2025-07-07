@@ -31,4 +31,16 @@ export default defineConfig({
         },
     }
   },
+  server: {
+    port: 3000,
+    open: '/dist/twilight-bundles.js',
+    // watch: {
+    //   // Watch for changes in the dist directory
+    // //   ignored: ['!**/dist/**']
+    // },
+    // // Serve the dist directory for the library
+    // fs: {
+    //   allow: ['dist']
+    // }
+  }
 });
