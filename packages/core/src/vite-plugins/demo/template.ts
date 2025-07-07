@@ -1,4 +1,4 @@
-const bundlesUrl = process.env.TWILIGHT_BUNDLES_URL || 'https://cdn.assets.salla.network/latest/twilight-bundles.js';
+const bundlesUrl = process.env.TWILIGHT_BUNDLES_URL || 'https://cdn.salla.network/js/twilight-bundles/latest/twilight-bundles.js';
 
 export interface DemoTemplateOptions {
   grid: {

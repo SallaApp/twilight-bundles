@@ -1,10 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
-declare global {
-    const Salla: any;
-}
-
 export default class ProductCard extends LitElement {
     @property({ type: Object })
     config: {

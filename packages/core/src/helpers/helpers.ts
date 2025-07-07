@@ -38,6 +38,7 @@ export default class Helpers {
                 "store": { "id": storeId || 1510890315 }
             });
         }
+        return Salla.onReady();
     }
 
     static makeSureSallaIsReady() {
