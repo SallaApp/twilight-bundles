@@ -1,7 +1,7 @@
 export default class ScrollTop extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = '↑';
-        this.style.cssText = `
+  connectedCallback() {
+    this.innerHTML = "↑";
+    this.style.cssText = `
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -13,6 +13,6 @@ export default class ScrollTop extends HTMLElement {
         cursor:pointer;
         font-size: 24px;
         `;
-        this.onclick = () => window.scrollTo(0, 0);
-    }
+    this.onclick = () => window.scrollTo(0, 0);
+  }
 }
