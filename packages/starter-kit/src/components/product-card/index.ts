@@ -4,15 +4,19 @@ import { property } from "lit/decorators.js";
 export default class ProductCard extends LitElement {
   @property({ type: Object })
   config: {
-    title: string;
-    price: string;
-    image: string;
-    discount?: string;
+    product: {
+      title: string;
+      price: string;
+      image: string;
+      discount?: string;
+    };
   } = {
-    title: "Product Name",
-    price: "$99.99",
-    image: "https://placehold.co/200x200",
-    discount: "-20%",
+    product: {
+      title: "Product Name",
+      price: "$99.99",
+      image: "https://placehold.co/200x200",
+      discount: "-20%",
+    },
   };
 
   static styles = css`
@@ -71,12 +75,12 @@ export default class ProductCard extends LitElement {
 
   private handleAddToCart() {
     (window as any).Salla.log("Adding to cart:", {
-      product: this.config.title,
-      price: this.config.price,
+      product: this.config.product.title,
+      price: this.config.product.price,
     });
 
     // Show a simple notification
-    (window as any).Salla.success(`Added ${this.config.title} to cart!`);
+    (window as any).Salla.success(`Added ${this.config.product.title} to cart!`);
   }
 
   render() {
@@ -84,14 +88,14 @@ export default class ProductCard extends LitElement {
       <div class="product-card">
         <img
           class="product-image"
-          src="${this.config.image}"
-          alt="${this.config.title}"
+          src="${this.config.product.image}"
+          alt="${this.config.product.title}"
         />
-        <h3 class="product-title">${this.config.title}</h3>
+        <h3 class="product-title">${this.config.product.title}</h3>
         <div>
-          <span class="price-tag">${this.config.price}</span>
-          ${this.config.discount
-            ? html`<span class="discount">${this.config.discount}</span>`
+          <span class="price-tag">${this.config.product.price}</span>
+          ${this.config.product.discount
+            ? html`<span class="discount">${this.config.product.discount}</span>`
             : ""}
         </div>
         <button class="add-to-cart" @click="${this.handleAddToCart}">
