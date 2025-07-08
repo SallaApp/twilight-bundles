@@ -55,4 +55,4 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN_MERCHANT }}
           accountId: ${{ secrets.CF_ACCOUT_ID_SALLA_GROUP }}
           workingDirectory: 'packages/form-builder-mock'
-          command: publish
+          command: deploy
