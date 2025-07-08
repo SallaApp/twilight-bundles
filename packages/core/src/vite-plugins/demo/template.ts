@@ -1,4 +1,7 @@
 const bundlesUrl = process.env.TWILIGHT_BUNDLES_URL || 'https://cdn.salla.network/js/twilight-bundles/latest/twilight-bundles.js';
+const formBuilderMockUrl = process.env.TWILIGHT_FORM_BUILDER_MOCK_BASE_URL
+? process.env.TWILIGHT_FORM_BUILDER_MOCK_BASE_URL + '/store/v1/form-builder-mock'
+: 'https://api.salla.dev/store/v1/form-builder-mock';
 
 export interface DemoTemplateOptions {
   grid: {
@@ -504,8 +507,8 @@ export function createDemoHTML(
             <form-builder-3
              form-key="form-builder-3"
              form-data='\${htmlSafeString(schema)}'
-             sources-url="https://api.salla.dev/admin/v2/form-builder/sources"
-             upload-url="https://api.salla.dev/admin/v2/form-builder/uploader"
+             sources-url="${formBuilderMockUrl}/sources"
+             upload-url="${formBuilderMockUrl}/uploader"
              direction="v"
              button="start"
              css-url="${formbuilderAssets.join(',')}
