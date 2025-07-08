@@ -32,7 +32,17 @@ function  getSchemaForComponent(componentName: string):string {
         const twilightBundlesPath = path.join(process.cwd(), 'twilight-bundle.json');
         const twilightBundles = JSON.parse(fs.readFileSync(twilightBundlesPath, 'utf-8'));
         const component = twilightBundles.components.find((component: any) => component.name === componentName);
-        return JSON.stringify(component?.fields)||'';
+        if(!component?.fields){
+            return '';
+        }
+        component.fields.push({
+            type: "string",
+            format: "hidden",
+            id: "twilight-bundles-component-name",
+            value: componentName
+        });
+        
+        return JSON.stringify(component?.fields);
     } catch (error) {
         console.error('Error getting schema for component:', error);
         return '';

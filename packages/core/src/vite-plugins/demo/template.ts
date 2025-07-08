@@ -59,14 +59,47 @@ export function createDemoHTML(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${translations.ar.title}</title>
     <script>
+    localStorage.setItem('FormBuilder::debugger', 1);
     window.customComponents = ${JSON.stringify(components.map(component => component.url))};
+    window.customComponentsSchema = ${JSON.stringify(Object.fromEntries(components.map(component => [component.name, component.schema])))};
+    function schemaForComponent(componentName){
+    if(localStorage.getItem('form-builder::'+componentName)){
+      return htmlSafeString(localStorage.getItem('form-builder::'+componentName));
+    }
+      
+      return htmlSafeString(window.customComponentsSchema[componentName]);
+    }
+    function getComponentData(componentName){
+      return htmlSafeString(localStorage.getItem('form-builder::data_' + componentName));
+    }
     function htmlSafeString(str) {
-  return str.replace(/&/g, '&amp;')
+        return str?.replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-}
+            .replace(/'/g, '&#039;')||'';
+    }
+    
+    window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
+      const ignoredKeys = ['static-', '$','twilight-bundles-component-name'];
+      const data = Object.fromEntries(
+        Object.entries(payload).filter(([key]) => !ignoredKeys.some(ignoredKey=>key.startsWith(ignoredKey)))
+      );
+      const componentName = payload['twilight-bundles-component-name'];
+      Salla.storage.set('form-builder::data_' + componentName, data);
+      if (componentName && window.customComponentsSchema && window.customComponentsSchema[componentName]) {
+        // Inject the data into the schema
+        const schema = window.customComponentsSchema[componentName];
+        await fetch('${formBuilderMockUrl}/schema-injector', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ schema, data }),
+        }).then(res=>res.json())
+        .then(data=>Salla.storage.set('form-builder::'+componentName, data))
+        .then(()=>window.location.reload())
+        .catch(err=>console.error('Error injecting data into schema:', err));
+      }
+    });
     </script>
     <link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://cdn.salla.network/images/logo/logo-square.png" />
     <link rel="icon" type="image/png" media="(prefers-color-scheme: dark)" href="https://cdn.salla.network/images/logo/logo-light-square.png" />
@@ -76,7 +109,7 @@ export function createDemoHTML(
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css?v=2.0.5">
     
     <!-- Preload form builder resources for faster loading -->
-    ${formbuilderAssets.map(asset => `<link rel="preload" href="${asset}" as="style">`).join('')}
+    
     <style>
       :root {
         --font-main: "PingARLT";
@@ -402,7 +435,7 @@ export function createDemoHTML(
                   <i class="sicon-settings"></i>
                 </button>
               </div>
-              <salla-custom-component component-name="${component.name}"></salla-custom-component>
+              <div demo-component="${component.name}"></div>
             </div>
           `)
             .join('')}
@@ -506,7 +539,8 @@ export function createDemoHTML(
         ? \`
             <form-builder-3
              form-key="form-builder-3"
-             form-data='\${htmlSafeString(schema)}'
+             form-data='\${schemaForComponent(componentName)}'
+             save-url="${formBuilderMockUrl}"
              sources-url="${formBuilderMockUrl}/sources"
              upload-url="${formBuilderMockUrl}/uploader"
              direction="v"
@@ -544,6 +578,31 @@ export function createDemoHTML(
       // Close drawer when clicking close button or overlay
       drawerClose.addEventListener('click', closeDrawer);
       drawerOverlay.addEventListener('click', closeDrawer);
+      (async () => {
+        async function waitForCondition(callback, timeout, interval) {
+        const start = Date.now();
+
+        while (Date.now() - start < timeout) {
+            if (callback()) {
+            return true;
+            }
+            console.log('waiting for window.Salla.onReady...'+(Date.now() - start));
+            await new Promise((resolve) => setTimeout(resolve, interval));
+        }
+
+        return false;
+        }
+            await waitForCondition(()=>window.Salla && window.Salla.onReady, 10000, 50);
+            window.Salla.onReady(()=>{
+                Salla.lang.setLocale(currentLang);  
+                document.querySelectorAll('[demo-component]').forEach(component => {
+                    const componentName = component.getAttribute('demo-component');
+                    const config = getComponentData(componentName);
+                    component.outerHTML = \`<salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>\`;
+                });
+            });
+            })();
+
     </script>
     <style>${options.css}</style>
     <script>${options.js}</script>
