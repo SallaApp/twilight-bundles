@@ -61,6 +61,49 @@ export default class ProductCard extends LitElement {
     .add-to-cart:hover {
       background: #45a049;
     }
+    
+    /* Skeleton loading styles */
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 0.8; }
+      100% { opacity: 0.6; }
+    }
+    
+    .skeleton-image {
+      width: 100%;
+      height: 200px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .skeleton-title {
+      width: 80%;
+      height: 20px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .skeleton-price {
+      width: 40%;
+      height: 24px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .skeleton-button {
+      width: 100%;
+      height: 40px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin-top: 1rem;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
   `;
 
   async connectedCallback() {
@@ -85,7 +128,14 @@ export default class ProductCard extends LitElement {
   }
 
   renderPlaceholder() {
-    return html`Loading... put suitable placeholder here`;
+    return html`
+      <div class="product-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-title"></div>
+        <div class="skeleton-price"></div>
+        <div class="skeleton-button"></div>
+      </div>
+    `;
   }
 
   render() {
