@@ -23,16 +23,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          # Remove npm cache since we're using pnpm
 
-      - name: Install pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+          run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
         run: |
-          npm install -g pnpm
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/form-builder-mock/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-form-builder-mock-
 
       - name: Install dependencies
-        run: |
-          cd packages/form-builder-mock
-          pnpm install --frozen-lockfile
+        working-directory: packages/form-builder-mock
+        run: pnpm install --frozen-lockfile
 
       - name: Publish to Cloudflare
         uses: cloudflare/wrangler-action@v3
@@ -40,4 +54,4 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN_MERCHANT }}
           accountId: ${{ secrets.CF_ACCOUT_ID_SALLA_GROUP }}
           workingDirectory: 'packages/form-builder-mock'
-          command: publish
+          command: deploy

@@ -117,8 +117,7 @@ router.post('/store/v1/form-builder-mock/uploader', async () => {
     status: 200,
     success: true,
     data: {
-      url: 'https://cdn.salla.network/images/mock-uploaded-image.jpg',
-      id: Math.floor(Math.random() * 1000000)
+      url: 'https://cdn.salla.sa/form-builder/EMl1Ae8o35qzaG0HvVqz0IpeqcK9uyHliKksscja.jpg',
     }
   }), {
     headers: {

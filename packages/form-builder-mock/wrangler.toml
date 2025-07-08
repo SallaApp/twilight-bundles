@@ -4,5 +4,5 @@ compatibility_date = "2023-01-01"
 
 
 routes = [
-  { pattern = "api.salla.dev/store/v1/form-builder-mock/*", zone_name = "salla.dev" },
+  { pattern = "https://api.salla.dev/store/v1/form-builder-mock/*", zone_name = "salla.dev" },
 ]
