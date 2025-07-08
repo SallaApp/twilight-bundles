@@ -1,4 +1,7 @@
 //@ts-nocheck
+declare global {
+    const Salla: any;
+}
 import { defineConfig } from 'vite';
 import {
   sallaBuildPlugin,

@@ -21,6 +21,6 @@
       "lit/*": ["node_modules/lit/*"]
     }
   },
-  "include": ["src/**/*", "vite-plugins.ts"],
+  "include": ["src/**/*", "vite-plugins.ts", "types"],
   "exclude": ["node_modules", "dist"]
 }

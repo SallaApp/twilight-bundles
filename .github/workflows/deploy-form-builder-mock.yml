@@ -1,0 +1,43 @@
+name: Deploy Form Builder Mock API
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/form-builder-mock/**'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on:
+      group: default
+    name: Deploy Form Builder Mock Worker
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIT_ACTION_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+
+      - name: Install dependencies
+        run: |
+          cd packages/form-builder-mock
+          pnpm install --frozen-lockfile
+
+      - name: Publish to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN_MERCHANT }}
+          accountId: ${{ secrets.CF_ACCOUT_ID_SALLA_GROUP }}
+          workingDirectory: 'packages/form-builder-mock'
+          command: publish
