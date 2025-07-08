@@ -1,23 +1,13 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
+import { Product, ProductCardConfig } from "./types";
 
 export default class ProductCard extends LitElement {
   @property({ type: Object })
-  config: {
-    product: {
-      title: string;
-      price: string;
-      image: string;
-      discount?: string;
-    };
-  } = {
-    product: {
-      title: "Product Name",
-      price: "$99.99",
-      image: "https://placehold.co/200x200",
-      discount: "-20%",
-    },
-  };
+  config?: ProductCardConfig;
+
+  @property({ type: Object })
+  product?: Product;
 
   static styles = css`
     .product-card {
@@ -73,33 +63,51 @@ export default class ProductCard extends LitElement {
     }
   `;
 
+  async connectedCallback() {
+    super.connectedCallback();
+    if(!this.config || !this.config.product || !this.config.product[0].value){
+        console.error('Product card config is not valid, you must provide `config="{...}"!');
+      return;
+    }
+    await (window as any).Salla.onReady();
+    this.product = await (window as any).Salla.product.api
+    .getDetails(this.config.product[0].value)
+    .then((res:{data:Product})=>res.data);
+  }
+
   private handleAddToCart() {
     (window as any).Salla.log("Adding to cart:", {
-      product: this.config.product.title,
-      price: this.config.product.price,
+      product: this.product,
     });
 
     // Show a simple notification
-    (window as any).Salla.success(`Added ${this.config.product.title} to cart!`);
+    (window as any).Salla.success(`Added ${this.product?.name} to cart!`);
+  }
+
+  renderPlaceholder() {
+    return html`Loading... put suitable placeholder here`;
   }
 
   render() {
+    if(!this.product){
+      return this.renderPlaceholder();
+    }
     return html`
       <div class="product-card">
         <img
           class="product-image"
-          src="${this.config.product.image}"
-          alt="${this.config.product.title}"
+          src="${this.product.image.url}"
+          alt="${this.product.image.alt}"
         />
-        <h3 class="product-title">${this.config.product.title}</h3>
+        <h3 class="product-title">${this.product.name}</h3>
         <div>
-          <span class="price-tag">${this.config.product.price}</span>
-          ${this.config.product.discount
-            ? html`<span class="discount">${this.config.product.discount}</span>`
+          <span class="price-tag">${this.product.price}</span>
+          ${this.product.discount
+            ? html`<span class="discount">${this.product.discount}</span>`
             : ""}
         </div>
         <button class="add-to-cart" @click="${this.handleAddToCart}">
-          Add to Cart
+          ${ (window as any).Salla.lang.get('pages.cart.add_to_cart')}
         </button>
       </div>
     `;

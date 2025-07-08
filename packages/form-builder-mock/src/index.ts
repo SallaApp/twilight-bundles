@@ -1,5 +1,6 @@
 import { Router } from 'itty-router';
 import { getSourceData } from './data';
+import { injectDataToSchema } from './routes/schema-injector';
 
 // Define types for Cloudflare Workers environment
 type ResponseInit = {
@@ -126,6 +127,25 @@ router.post('/store/v1/form-builder-mock/uploader', async () => {
     }
   } as ResponseInit);
 });
+
+router.post('/store/v1/form-builder-mock', async (request) => {
+    return new Response(await request.text(), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    } as ResponseInit);
+  });
+
+router.post('/store/v1/form-builder-mock/schema-injector', async (request) => {
+    const data = await request.json();
+    return new Response(JSON.stringify(injectDataToSchema(data.schema, data.data)), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
+    } as ResponseInit);
+  });
 
 // Handle 404 - Not Found
 router.all('*', () => {
