@@ -1,7 +1,6 @@
 const bundlesUrl = process.env.TWILIGHT_BUNDLES_URL || 'https://cdn.salla.network/js/twilight-bundles/latest/twilight-bundles.js';
-const formBuilderMockUrl = process.env.TWILIGHT_FORM_BUILDER_MOCK_BASE_URL
-? process.env.TWILIGHT_FORM_BUILDER_MOCK_BASE_URL + '/store/v1/form-builder-mock'
-: 'https://api.salla.dev/store/v1/form-builder-mock';
+let formBuilderMockUrl = process.env.TWILIGHT_FORM_BUILDER_MOCK_BASE_URL ||  'https://salla.design';
+formBuilderMockUrl = formBuilderMockUrl.replace(/\/$/, '') + '/api/v1/form-builder-mock';
 
 export interface DemoTemplateOptions {
   grid: {
@@ -113,10 +112,10 @@ export function createDemoHTML(
     <style>
       :root {
         --font-main: "PingARLT";
-        --primary-50: 186 243 230;  /* #BAF3E6 */
-        --primary-100: 120 232 206; /* #78E8CE */
-        --primary-900: 0 73 86;     /* #004956 */
-        --header-bg: #004e5c;
+        --primary-50: rgb(186, 243, 230);  /* #BAF3E6 */
+        --primary-100: rgb(120, 232, 206); /* #78E8CE */
+        --primary-900: rgb(0, 73, 86);     /* #004956 */
+        --primary: rgb(0, 78, 92);
       }
 
       :root[data-theme="dark"] {
@@ -125,7 +124,7 @@ export function createDemoHTML(
         --text-primary: #FFFFFF;
         --text-secondary: #9CA3AF;
         --border-color: #333333;
-        --header-bg: #1d1e20;
+        --primary: #1d1e20;
         --component-title: #baf3e5;
       }
 
@@ -151,7 +150,7 @@ export function createDemoHTML(
       }
 
       header {
-        background-color: var(--header-bg);
+        background-color: var(--primary);
         padding: 0.75rem 0;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -333,6 +332,12 @@ export function createDemoHTML(
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
         overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+      }
+      .drawer.active {
+        opacity: 1;
+        visibility: visible;
       }
 
       [dir="ltr"] .drawer {
@@ -353,26 +358,65 @@ export function createDemoHTML(
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
+        padding: 1.25rem 1.5rem;
         border-bottom: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
 
       .drawer-header h3 {
         margin: 0;
         color: var(--text-primary);
+        flex: 1;
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      
+      .drawer-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
       }
 
-      .drawer-close {
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
+      .drawer-close,
+      .drawer-reset {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
         cursor: pointer;
-        width: 32px;
-        height: 32px;
-        border-radius: 4px;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        padding: 0.5rem;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      
+      .drawer-close:hover,
+      .drawer-reset:hover {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .drawer-close:active,
+      .drawer-reset:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      
+      .drawer-reset {
+        color: var(--color-primary);
+      }
+      
+      .drawer-close {
+        color: var(--color-danger, var(--text-secondary));
       }
 
       .drawer-content {
@@ -392,27 +436,11 @@ export function createDemoHTML(
           </div>
           <div class="actions">
             <button id="toggleTheme" title="Toggle theme">
-              <svg class="theme-icon moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-              </svg>
-              <svg class="theme-icon sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"/>
-                <path d="M12 2v2"/>
-                <path d="M12 20v2"/>
-                <path d="m4.93 4.93 1.41 1.41"/>
-                <path d="m17.66 17.66 1.41 1.41"/>
-                <path d="M2 12h2"/>
-                <path d="M20 12h2"/>
-                <path d="m6.34 17.66-1.41 1.41"/>
-                <path d="m19.07 4.93-1.41 1.41"/>
-              </svg>
+              <i class="theme-icon moon sicon-moon"></i>
+              <i class="theme-icon sun sicon-lightbulb"></i>
             </button>
             <button id="toggleLang" title="Toggle language">
-              <svg class="lang-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                <path d="M2 12h20"/>
-              </svg>
+              <i class="lang-icon sicon-world"></i>
               <span class="lang-code">EN</span>
             </button>
           </div>
@@ -450,11 +478,10 @@ export function createDemoHTML(
     <div class="drawer" id="componentDrawer">
       <div class="drawer-header">
         <h3 id="drawerTitle">Component Settings</h3>
-        <button class="drawer-close" id="drawerClose">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-          </svg>
-        </button>
+        <div class="drawer-actions">
+          <button class="drawer-reset sicon-rotate" id="drawerReset" title="Reset settings"></button>
+          <button class="drawer-close sicon-cancel" id="drawerClose"></button>
+        </div>
       </div>
       <div class="drawer-content" id="drawerContent">
         <!-- Content will be dynamically populated -->
@@ -509,6 +536,7 @@ export function createDemoHTML(
       const drawer = document.getElementById('componentDrawer');
       const drawerOverlay = document.getElementById('drawerOverlay');
       const drawerClose = document.getElementById('drawerClose');
+      const drawerReset = document.getElementById('drawerReset');
       const drawerTitle = document.getElementById('drawerTitle');
       const drawerContent = document.getElementById('drawerContent');
       const settingsButtons = document.querySelectorAll('.component-settings-btn');
@@ -524,7 +552,7 @@ export function createDemoHTML(
           document.head.appendChild(script);
         }
         
-        drawerTitle.textContent = componentName + ' Demo Config';
+        drawerTitle.textContent = componentName;
         drawer.classList.add('active');
         drawerOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -545,11 +573,10 @@ export function createDemoHTML(
              upload-url="${formBuilderMockUrl}/uploader"
              direction="v"
              button="start"
-             css-url="${formbuilderAssets.join(',')}
+             css-url="${formbuilderAssets.join(',')}"
              language-list="${options.formbuilder.languages.join(',')}"
              default-language="${options.formbuilder.defaultLanguage}"
-             submit-label="حفظ التغييرات"
-             modify-upload="true"></form-builder-3>
+             submit-label="حفظ التغييرات"></form-builder-3>
         \`
         : \`<div style="padding: 2rem; text-align: center; color: #666;">
             <div style="margin-bottom: 1rem;">
@@ -568,6 +595,13 @@ export function createDemoHTML(
         document.body.style.overflow = '';
       }
       
+      // Function to reset settings and reload page
+      function resetSettings() {
+        localStorage.removeItem('form-builder::' + drawer.currentComponent);
+        localStorage.removeItem('form-builder::data_' + drawer.currentComponent);
+        window.location.reload();
+      }
+      
       // Add click event listeners to settings buttons
       settingsButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -575,9 +609,10 @@ export function createDemoHTML(
         });
       });
       
-      // Close drawer when clicking close button or overlay
+      // Add event listeners for drawer close and reset
       drawerClose.addEventListener('click', closeDrawer);
       drawerOverlay.addEventListener('click', closeDrawer);
+      drawerReset.addEventListener('click', resetSettings);
       (async () => {
         async function waitForCondition(callback, timeout, interval) {
         const start = Date.now();

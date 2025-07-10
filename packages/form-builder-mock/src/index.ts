@@ -83,7 +83,7 @@ router.options('*', () => {
 });
 
 // Handle the sources endpoint
-router.get('/store/v1/form-builder-mock/sources', async (request) => {
+router.get('/api/v1/form-builder-mock/sources', async (request) => {
   const url = new URL(request.url);
   const source = url.searchParams.get('source');
   
@@ -113,7 +113,7 @@ router.get('/store/v1/form-builder-mock/sources', async (request) => {
 });
 
 // Handle uploader endpoint (mock)
-router.post('/store/v1/form-builder-mock/uploader', async () => {
+router.post('/api/v1/form-builder-mock/uploader', async () => {
   return new Response(JSON.stringify({
     status: 200,
     success: true,
@@ -128,7 +128,7 @@ router.post('/store/v1/form-builder-mock/uploader', async () => {
   } as ResponseInit);
 });
 
-router.post('/store/v1/form-builder-mock', async (request) => {
+router.post('/api/v1/form-builder-mock', async (request) => {
     return new Response(await request.text(), {
       headers: {
         'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ router.post('/store/v1/form-builder-mock', async (request) => {
     } as ResponseInit);
   });
 
-router.post('/store/v1/form-builder-mock/schema-injector', async (request) => {
+router.post('/api/v1/form-builder-mock/schema-injector', async (request) => {
     const data = await request.json();
     return new Response(JSON.stringify(injectDataToSchema(data.schema, data.data)), {
       headers: {
