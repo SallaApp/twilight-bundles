@@ -14,8 +14,8 @@ export default defineConfig({
     sallaTransformPlugin(),
     sallaBuildPlugin(),
     sallaDemoPlugin({
-      // Uncomment to show only specific components
-      // components: ['product-card', 'scroll-top']
+      // Uncomment to preview only specific components
+      // components: ['product-card', 'scroll-top', 'table-list']
     }),
   ]
 });

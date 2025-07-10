@@ -1,26 +1,3 @@
-/**
- * Product type definitions for the product-card component
- */
-
-/**
- * Product image type
- */
-export interface ProductImage {
-  url: string;
-  alt: string | null;
-}
-
-/**
- * Currency price type
- */
-export interface CurrencyPrice {
-  currency: string;
-  amount: number;
-}
-
-/**
- * Product type definition based on Salla API response
- */
 export interface Product {
   id: number;
   sku: string | null;
@@ -32,7 +9,10 @@ export interface Product {
   type: string;
   status: string;
   price: number;
-  base_currency_price: CurrencyPrice;
+  base_currency_price: {
+    currency: string;
+    amount: number;
+  };
   sale_price: number;
   regular_price: number;
   starting_price: number;
@@ -53,25 +33,11 @@ export interface Product {
   is_require_shipping: boolean;
   weight: string;
   calories: string | null;
-  image: ProductImage;
+  image?: {
+    url: string;
+    alt: string | null;
+  };
   currency: string;
   has_size_guide: boolean;
-  
-  // Computed properties that might be used in the component
-  discount?: string; // For displaying discount percentage/amount
-}
-
-/**
- * Form builder product selection type
- */
-export interface ProductSelection {
-  value: string | number;
-  label: string;
-}
-
-/**
- * Component configuration type
- */
-export interface ProductCardConfig {
-  product: ProductSelection[];
+  discount?: string;
 }

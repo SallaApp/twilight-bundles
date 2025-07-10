@@ -1,13 +1,10 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { Product, ProductCardConfig } from "./types";
+import { Product } from "./types";
 
 export default class ProductCard extends LitElement {
-  @property({ type: Object })
-  config?: ProductCardConfig;
-
-  @property({ type: Object })
-  product?: Product;
+  @property({ type: Object }) config?: {product:Array<{value:number; label: string;}>};
+  @property({ type: Object }) product?: Product;
 
   static styles = css`
     .product-card {
@@ -35,7 +32,7 @@ export default class ProductCard extends LitElement {
     }
     .price-tag {
       font-size: 1.2rem;
-      color: #2196f3;
+      color:var(--primary);
       font-weight: bold;
     }
     .discount {
@@ -52,14 +49,14 @@ export default class ProductCard extends LitElement {
       margin-top: 1rem;
       border: none;
       border-radius: 4px;
-      background: #4caf50;
+      background: var(--primary);
       color: white;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
     }
     .add-to-cart:hover {
-      background: #45a049;
+      background: var(--primary-100);
     }
     
     /* Skeleton loading styles */
@@ -108,20 +105,18 @@ export default class ProductCard extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    if(!this.config || !this.config.product || !this.config.product[0].value){
-        console.error('Product card config is not valid, you must provide `config="{...}"!');
+    const productID = this.config?.product?.[0]?.value;
+    if(!productID){
+      console.error('Product card config is not valid, you must provide `config="{...}"!');
       return;
     }
     await (window as any).Salla.onReady();
-    this.product = await (window as any).Salla.product.api
-    .getDetails(this.config.product[0].value)
-    .then((res:{data:Product})=>res.data);
+    this.product = await (window as any).Salla.product.api.getDetails(productID)
+    .then((res:{data:Product}) => res.data);
   }
 
   private handleAddToCart() {
-    (window as any).Salla.log("Adding to cart:", {
-      product: this.product,
-    });
+    (window as any).Salla.log("Adding to cart:", {product: this.product});
 
     // Show a simple notification
     (window as any).Salla.success(`Added ${this.product?.name} to cart!`);
@@ -146,14 +141,14 @@ export default class ProductCard extends LitElement {
       <div class="product-card">
         <img
           class="product-image"
-          src="${this.product.image.url}"
-          alt="${this.product.image.alt}"
+          src="${this.product.image?.url}"
+          alt="${this.product.image?.alt}"
         />
         <h3 class="product-title">${this.product.name}</h3>
         <div>
-          <span class="price-tag">${this.product.price}</span>
+          <span class="price-tag">${(window as any).Salla.money(this.product.price)}</span>
           ${this.product.discount
-            ? html`<span class="discount">${this.product.discount}</span>`
+            ? html`<span class="discount">${(window as any).Salla.money(this.product.discount)}</span>`
             : ""}
         </div>
         <button class="add-to-cart" @click="${this.handleAddToCart}">
