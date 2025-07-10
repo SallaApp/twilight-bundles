@@ -163,12 +163,28 @@
                     "format": "dropdown-list",
                     "required": true,
                     "options": [
-                        { "label": "Clothing", "value": "clothing", "key": "clothing" },
-                        { "label": "Electronics", "value": "electronics", "key": "electronics" },
-                        { "label": "Home & Garden", "value": "home", "key": "home"}
+                        {
+                            "label": "Clothing",
+                            "value": "clothing",
+                            "key": "clothing"
+                        },
+                        {
+                            "label": "Electronics",
+                            "value": "electronics",
+                            "key": "electronics"
+                        },
+                        {
+                            "label": "Home & Garden",
+                            "value": "home",
+                            "key": "home"
+                        }
                     ],
                     "selected": [
-                        { "label": "Electronics", "value": "electronics", "key": "electronics"}
+                        {
+                            "label": "Electronics",
+                            "value": "electronics",
+                            "key": "electronics"
+                        }
                     ]
                 },
                 {
@@ -181,13 +197,33 @@
                     "multichoice": true,
                     "description": "Select multiple tags",
                     "options": [
-                        { "label": "New", "value": "new", "key": "new" },
-                        { "label": "Featured", "value": "featured", "key": "featured" },
-                        { "label": "Offer", "value": "offer", "key": "offer"}
+                        {
+                            "label": "New",
+                            "value": "new",
+                            "key": "new"
+                        },
+                        {
+                            "label": "Featured",
+                            "value": "featured",
+                            "key": "featured"
+                        },
+                        {
+                            "label": "Offer",
+                            "value": "offer",
+                            "key": "offer"
+                        }
                     ],
                     "selected": [
-                        { "label": "New", "value": "new", "key": "new"},
-                        { "label": "Offer", "value": "offer", "key": "offer"}
+                        {
+                            "label": "New",
+                            "value": "new",
+                            "key": "new"
+                        },
+                        {
+                            "label": "Offer",
+                            "value": "offer",
+                            "key": "offer"
+                        }
                     ]
                 },
                 {
@@ -198,12 +234,28 @@
                     "format": "radio-list",
                     "required": true,
                     "options": [
-                        { "label": "Standard", "value": "standard", "key": "standard" },
-                        { "label": "Express", "value": "express", "key": "express" },
-                        { "label": "Priority", "value": "priority", "key": "priority"}
+                        {
+                            "label": "Standard",
+                            "value": "standard",
+                            "key": "standard"
+                        },
+                        {
+                            "label": "Express",
+                            "value": "express",
+                            "key": "express"
+                        },
+                        {
+                            "label": "Priority",
+                            "value": "priority",
+                            "key": "priority"
+                        }
                     ],
                     "selected": [
-                        { "label": "Standard", "value": "standard", "key": "standard"}
+                        {
+                            "label": "Standard",
+                            "value": "standard",
+                            "key": "standard"
+                        }
                     ]
                 }
             ]
@@ -306,18 +358,64 @@
                     "format": "variable-list",
                     "required": true,
                     "source": "custom",
-                    "selected":[{"label": "Article","key": "blog_articles","value": "blog_articles"}],
+                    "selected": [
+                        {
+                            "label": "Article",
+                            "key": "blog_articles",
+                            "value": "blog_articles"
+                        }
+                    ],
                     "sources": [
-                        {"label": "Product","key": "products","value": "products"},
-                        {"label": "Category","key": "categories","value": "categories"},
-                        {"label": "Brand","key": "brands","value": "brands"},
-                        {"label": "Page","key": "pages","value": "pages"},
-                        {"label": "Article","key": "blog_articles","value": "blog_articles"},
-                        {"label": "Blog Category","key": "blog_categories","value": "blog_categories"},
-                        {"label": "Offer","key": "offers_link","value": "offers_link"},
-                        {"label": "Brand Link","key": "brands_link","value": "brands_link"},
-                        {"label": "Blog Link","key": "blog_link","value": "blog_link"},
-                        {"label": "Custom","key": "custom","value": "custom"}
+                        {
+                            "label": "Product",
+                            "key": "products",
+                            "value": "products"
+                        },
+                        {
+                            "label": "Category",
+                            "key": "categories",
+                            "value": "categories"
+                        },
+                        {
+                            "label": "Brand",
+                            "key": "brands",
+                            "value": "brands"
+                        },
+                        {
+                            "label": "Page",
+                            "key": "pages",
+                            "value": "pages"
+                        },
+                        {
+                            "label": "Article",
+                            "key": "blog_articles",
+                            "value": "blog_articles"
+                        },
+                        {
+                            "label": "Blog Category",
+                            "key": "blog_categories",
+                            "value": "blog_categories"
+                        },
+                        {
+                            "label": "Offer",
+                            "key": "offers_link",
+                            "value": "offers_link"
+                        },
+                        {
+                            "label": "Brand Link",
+                            "key": "brands_link",
+                            "value": "brands_link"
+                        },
+                        {
+                            "label": "Blog Link",
+                            "key": "blog_link",
+                            "value": "blog_link"
+                        },
+                        {
+                            "label": "Custom",
+                            "key": "custom",
+                            "value": "custom"
+                        }
                     ]
                 }
             ]

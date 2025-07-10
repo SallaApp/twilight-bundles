@@ -18,7 +18,10 @@ export default defineConfig({
         //    /^lit/,
             'fs',
             'path',
-            'glob'
+            'glob',
+            'url',
+            'readline',
+            'uuid'
         ],
         output: {
             globals: {
