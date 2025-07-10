@@ -34,14 +34,20 @@ export function createDemoHTML(
       toggleLang: 'English',
       dir: 'rtl',
       lang: 'ar',
-      title: 'حزم العناصر'
+      title: 'حزم العناصر',
+      noSettings: 'لا توجد إعدادات لهذا العنصر',
+      addSettings: 'إضافة إعدادات لهذا العنصر',
+      saveSettings: 'حفظ التغييرات',
     },
     en: {
       toggleTheme: 'Toggle Theme',
       toggleLang: 'Arabic',
       dir: 'ltr',
       lang: 'en',
-      title: 'Twilight Bundles'
+      title: 'Twilight Bundles',
+      noSettings: 'No settings for this component',
+      addSettings: 'Add settings for this component',
+      saveSettings: 'Save changes',
     }
   };
 
@@ -79,6 +85,82 @@ export function createDemoHTML(
             .replace(/'/g, '&#039;')||'';
     }
     
+    function renderComponent(componentName, existingComponent){
+        if(Salla.storage.get('hidden-salla-components', []).includes(componentName)){
+            return;
+        }
+        const tempDom = document.createElement('div');
+        const config = getComponentData(componentName);
+        tempDom.innerHTML=\`<div class="component-card" data-component="\${componentName}">
+            <div class="component-card-header">
+                <h2>
+                    <i class="sicon-tag"></i>
+                    \${componentName}
+                </h2>
+                <div class="component-card-actions">
+                    <button class="component-visibility-btn" aria-label="Toggle visibility" 
+                        onclick="hideComponent('\${componentName}')" 
+                        title="Hide component">
+                            <i class="sicon-eye"></i>
+                        </button>
+                        <button class="component-settings-btn" aria-label="Open settings"
+                        data-component="\${componentName}"
+                        data-schema="\${config}">
+                            <i class="sicon-settings"></i>
+                        </button>
+                    </div>
+                </div>
+                <salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>
+            </div>
+        </div>\`;
+        tempDom.querySelector('.component-settings-btn').addEventListener('click', () => openDrawer(componentName));
+        const componentsGrid = document.getElementById('componentsGrid');
+        existingComponent
+          ? componentsGrid.insertBefore(tempDom.firstElementChild, existingComponent.nextSibling)
+          : componentsGrid.appendChild(tempDom.firstElementChild);
+        tempDom.remove();
+    }
+        function reRenderComponent(componentName){
+          const existingComponent = document.querySelector('.component-card[data-component="' + componentName + '"]');
+          renderComponent(componentName, existingComponent);
+          existingComponent.remove();
+        }
+
+    
+    // Save component visibility to localStorage
+    function hideComponent(componentName) {
+      const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
+      if(!hiddenComponents?.includes(componentName)){
+        hiddenComponents.push(componentName);
+      }
+      Salla.storage.set('hidden-salla-components', hiddenComponents);
+      document.querySelector('.component-card[data-component="' + componentName + '"]')?.remove();
+    }
+
+    function showComponent(componentName) {
+      let hiddenComponents = Salla.storage.get('hidden-salla-components', []);
+      if(hiddenComponents.includes(componentName)){
+        hiddenComponents = hiddenComponents.filter(component => component !== componentName);
+      }
+      Salla.storage.set('hidden-salla-components', hiddenComponents);
+      renderComponent(componentName);
+    }
+    
+    function toggleComponentVisibility(element) {
+      const componentName = element.value;
+      element.checked = Salla.storage.get('hidden-salla-components', []).includes(componentName);
+      element.checked ?showComponent(componentName) : hideComponent(componentName);
+    }
+
+    function openFilterDrawer(){
+      const componentsFilterDrawer = document.getElementById('componentsFilterDrawer');
+      componentsFilterDrawer?.classList.add('active');
+      componentsFilterDrawer?.querySelectorAll('.visibility-checkbox')
+      .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
+      drawerOverlay?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
     window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
       const ignoredKeys = ['static-', '$','twilight-bundles-component-name'];
       const data = Object.fromEntries(
@@ -95,7 +177,8 @@ export function createDemoHTML(
           body: JSON.stringify({ schema, data }),
         }).then(res=>res.json())
         .then(data=>Salla.storage.set('form-builder::'+componentName, data))
-        .then(()=>window.location.reload())
+        .then(()=>reRenderComponent(componentName))
+        .then(()=>closeDrawer())
         .catch(err=>console.error('Error injecting data into schema:', err));
       }
     });
@@ -112,10 +195,10 @@ export function createDemoHTML(
     <style>
       :root {
         --font-main: "PingARLT";
-        --primary-50: rgb(186, 243, 230);  /* #BAF3E6 */
-        --primary-100: rgb(120, 232, 206); /* #78E8CE */
-        --primary-900: rgb(0, 73, 86);     /* #004956 */
-        --primary: rgb(0, 78, 92);
+        --color-primary-50: rgb(186, 243, 230);  /* #BAF3E6 */
+        --color-primary-100: rgb(120, 232, 206); /* #78E8CE */
+        --color-primary-900: rgb(0, 73, 86);     /* #004956 */
+        --color-primary: rgb(0, 78, 92);
       }
 
       :root[data-theme="dark"] {
@@ -124,7 +207,7 @@ export function createDemoHTML(
         --text-primary: #FFFFFF;
         --text-secondary: #9CA3AF;
         --border-color: #333333;
-        --primary: #1d1e20;
+        --color-primary: #1d1e20;
         --component-title: #baf3e5;
       }
 
@@ -150,7 +233,7 @@ export function createDemoHTML(
       }
 
       header {
-        background-color: var(--primary);
+        background-color: var(--color-primary);
         padding: 0.75rem 0;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -210,7 +293,7 @@ export function createDemoHTML(
       }
 
       .actions button:hover {
-        color: rgb(var(--primary-100));
+        color: rgb(var(--color-primary-100));
       }
 
       .theme-icon {
@@ -283,9 +366,15 @@ export function createDemoHTML(
         font-size: 1.25rem;
       }
 
+      .component-card-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      
+      .component-visibility-btn,
       .component-settings-btn {
         background: transparent;
-        border: none;
+        border: 1px solid var(--border-color);
         color: var(--text-secondary);
         cursor: pointer;
         width: 32px;
@@ -297,9 +386,32 @@ export function createDemoHTML(
         transition: all 0.2s ease;
       }
 
+      .component-visibility-btn:hover,
       .component-settings-btn:hover {
         background-color: var(--bg-secondary);
         color: var(--text-primary);
+      }
+      
+      .component-card.hidden {
+        opacity: 0.5;
+        position: relative;
+      }
+      
+      .component-card.hidden::after {
+        content: "Hidden";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.1);
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--text-secondary);
+        z-index: 10;
       }
 
       /* Drawer styles */
@@ -422,6 +534,72 @@ export function createDemoHTML(
       .drawer-content {
         padding: 1rem;
       }
+      
+      /* Filter drawer styles */
+      .filter-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      
+      .btn-primary {
+        background-color: var(--color-primary-100);
+        color: var(--color-primary-900);
+      }
+      
+      .btn-primary:hover {
+        background-color: var(--color-primary-50);
+      }
+      
+      .btn-secondary {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+      }
+      
+      .btn-secondary:hover {
+        background-color: var(--bg-primary);
+      }
+      
+      .component-visibility-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        overflow-y: auto;
+      }
+      
+      .visibility-item {
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+      
+      .visibility-item:hover {
+        background-color: var(--bg-secondary);
+      }
+      
+      .visibility-item label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        color: var(--text-primary);
+      }
+      
+      .visibility-checkbox {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -435,6 +613,7 @@ export function createDemoHTML(
             <h1 class="title" id="pageTitle">${translations.ar.title}</h1>
           </div>
           <div class="actions">
+            <button id="toggleComponentsFilter" title="Filter components" onclick="openFilterDrawer()" class="sicon-filter"></button>
             <button id="toggleTheme" title="Toggle theme">
               <i class="theme-icon moon sicon-moon"></i>
               <i class="theme-icon sun sicon-lightbulb"></i>
@@ -449,25 +628,7 @@ export function createDemoHTML(
     </header>
     <main>
       <div class="container">
-        <div class="components-grid">
-          ${components.map(component => `
-            <div class="component-card" data-component="${component.name}">
-              <div class="component-card-header">
-                <h2>
-                  <i class="sicon-tag"></i>
-                  ${component.name}
-                </h2>
-                <button class="component-settings-btn" aria-label="Open settings"
-                data-component="${component.name}"
-                data-schema="${htmlSafeString(component.schema)}">
-                  <i class="sicon-settings"></i>
-                </button>
-              </div>
-              <div demo-component="${component.name}"></div>
-            </div>
-          `)
-            .join('')}
-        </div>
+        <div class="components-grid" id="componentsGrid"></div>
       </div>
     </main>
     
@@ -475,16 +636,48 @@ export function createDemoHTML(
     <div class="drawer-overlay" id="drawerOverlay"></div>
     
     <!-- Component settings drawer -->
-    <div class="drawer" id="componentDrawer">
+    <div id="componentDrawer" class="drawer">
       <div class="drawer-header">
-        <h3 id="drawerTitle">Component Settings</h3>
+        <h3 class="drawer-title">Component Settings</h3>
         <div class="drawer-actions">
-          <button class="drawer-reset sicon-rotate" id="drawerReset" title="Reset settings"></button>
-          <button class="drawer-close sicon-cancel" id="drawerClose"></button>
+          <button id="resetForm" class="drawer-reset" title="Reset to default">
+            <i class="sicon-rotate"></i>
+          </button>
+          <button id="closeDrawer" class="drawer-close">
+            <i class="sicon-cancel"></i>
+          </button>
         </div>
       </div>
-      <div class="drawer-content" id="drawerContent">
-        <!-- Content will be dynamically populated -->
+      <div class="drawer-content">
+        <div id="formContainer"></div>
+      </div>
+    </div>
+    
+    <!-- Components filter drawer -->
+    <div id="componentsFilterDrawer" class="drawer">
+      <div class="drawer-header">
+        <h3>Component Visibility</h3>
+        <div class="drawer-actions">
+          <button class="drawer-close" onclick="document.getElementById('componentsFilterDrawer').classList.remove('active')">
+            <i class="sicon-cancel"></i>
+          </button>
+        </div>
+      </div>
+      <div class="drawer-content">
+        <div class="component-visibility-list">
+          ${components.map(component => `
+            <div class="visibility-item">
+              <label>
+                <input type="checkbox"
+                name="component-visibility"
+                class="visibility-checkbox" 
+                value="${component.name}"
+                onchange="toggleComponentVisibility(this)">
+                <span>${component.name}</span>
+              </label>
+            </div>
+          `).join('')}
+        </div>
       </div>
     </div>
     
@@ -497,6 +690,9 @@ export function createDemoHTML(
       let currentLang = localStorage.getItem('salla_demo_lang') || 'ar';
       let currentTheme = localStorage.getItem('salla_demo_theme') || 'light';
 
+      function __demoTrans(key){
+        return translations[currentLang][key];
+      }
       // Function to update language
       function updateLanguage(lang) {
         currentLang = lang;
@@ -509,7 +705,7 @@ export function createDemoHTML(
         const langCode = toggleLang.querySelector('.lang-code');
         const pageTitle = document.getElementById('pageTitle');
         langCode.textContent = currentLang === 'ar' ? 'EN' : 'AR';
-        pageTitle.textContent = translations[currentLang].title;
+        pageTitle.textContent = __demoTrans('title');
       }
 
       // Function to update theme
@@ -535,14 +731,13 @@ export function createDemoHTML(
       // Drawer functionality
       const drawer = document.getElementById('componentDrawer');
       const drawerOverlay = document.getElementById('drawerOverlay');
-      const drawerClose = document.getElementById('drawerClose');
-      const drawerReset = document.getElementById('drawerReset');
-      const drawerTitle = document.getElementById('drawerTitle');
-      const drawerContent = document.getElementById('drawerContent');
-      const settingsButtons = document.querySelectorAll('.component-settings-btn');
+      const drawerClose = drawer?.querySelector('.drawer-close');
+      const drawerReset = drawer?.querySelector('.drawer-reset');
+      const drawerTitle = drawer?.querySelector('.drawer-title');
+      const drawerContent = drawer?.querySelector('.drawer-content');
       
       // Function to open drawer
-      function openDrawer(componentName, schema) {
+      function openDrawer(componentName) {
         // Inject form builder script if it's not loaded yet
         if (!document.getElementById('form-builder-3-script')) {
           const script = document.createElement('script');
@@ -560,14 +755,25 @@ export function createDemoHTML(
             return;
         }
         drawer.currentComponent = componentName;
+        const schema = schemaForComponent(componentName);
+
+        if(!schema){
+            return drawerContent.innerHTML = \`
+            <div style="padding: 2rem; text-align: center; color: #666;">
+                <div style="margin-bottom: 1rem;">
+                  <i class="sicon-info" style="font-size: 3rem; color: #2377CD;"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem; font-weight: 500;">\${__demoTrans('noSettings')}</h3>
+                <p>\${__demoTrans('addSettings')}</p>
+                <a href="/twilight-bundle.json" target="_blank">twilight-bundle.json</a>
+              </div>
+            \`;
+        }
         
-        // Populate drawer content based on the component
-        // This is a placeholder that mimics the schema form rendering
-        drawerContent.innerHTML = schema
-        ? \`
+        drawerContent.innerHTML = \`
             <form-builder-3
              form-key="form-builder-3"
-             form-data='\${schemaForComponent(componentName)}'
+             form-data='\${schema}'
              save-url="${formBuilderMockUrl}"
              sources-url="${formBuilderMockUrl}/sources"
              upload-url="${formBuilderMockUrl}/uploader"
@@ -576,21 +782,13 @@ export function createDemoHTML(
              css-url="${formbuilderAssets.join(',')}"
              language-list="${options.formbuilder.languages.join(',')}"
              default-language="${options.formbuilder.defaultLanguage}"
-             submit-label="حفظ التغييرات"></form-builder-3>
-        \`
-        : \`<div style="padding: 2rem; text-align: center; color: #666;">
-            <div style="margin-bottom: 1rem;">
-              <i class="sicon-info" style="font-size: 3rem; color: #2377CD;"></i>
-            </div>
-            <h3 style="margin-bottom: 1rem; font-weight: 500;">لا توجد إعدادات لهذا العنصر</h3>
-            <p>يمكن إضافة إعدادات لهذا العنصر في ملف</p>
-            <a href="/twilight-bundle.json" target="_blank">twilight-bundle.json</a>
-          </div>\`;
+             submit-label="\${__demoTrans('saveSettings')}"></form-builder-3>
+        \`;
       }
       
       // Function to close drawer
       function closeDrawer() {
-        drawer.classList.remove('active');
+        document.querySelectorAll('.active').forEach(element => element.classList.remove('active'));
         drawerOverlay.classList.remove('active');
         document.body.style.overflow = '';
       }
@@ -599,15 +797,9 @@ export function createDemoHTML(
       function resetSettings() {
         localStorage.removeItem('form-builder::' + drawer.currentComponent);
         localStorage.removeItem('form-builder::data_' + drawer.currentComponent);
-        window.location.reload();
+        reRenderComponent(drawer.currentComponent);
       }
-      
-      // Add click event listeners to settings buttons
-      settingsButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          openDrawer(button.getAttribute('data-component'), button.getAttribute('data-schema'));
-        });
-      });
+    
       
       // Add event listeners for drawer close and reset
       drawerClose.addEventListener('click', closeDrawer);
@@ -627,16 +819,13 @@ export function createDemoHTML(
 
         return false;
         }
-            await waitForCondition(()=>window.Salla && window.Salla.onReady, 10000, 50);
-            window.Salla.onReady(()=>{
-                Salla.lang.setLocale(currentLang);  
-                document.querySelectorAll('[demo-component]').forEach(component => {
-                    const componentName = component.getAttribute('demo-component');
-                    const config = getComponentData(componentName);
-                    component.outerHTML = \`<salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>\`;
-                });
-            });
-            })();
+        await waitForCondition(()=>window.Salla && window.Salla.onReady, 10000, 50);
+        window.Salla.onReady(() => {
+            Salla.lang.setLocale(currentLang);  
+            const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
+            Object.keys(customComponentsSchema).forEach(name => renderComponent(name));
+        });
+        })();
 
     </script>
     <style>${options.css}</style>
