@@ -6,7 +6,10 @@ This starter kit provides a foundation for building custom Twilight components f
 
 1. Clone this repository
 2. Remove the example components in `src/components/`
-3. Create your own components in the `src/components/` directory
+3. Create your own components using the component generator:
+   ```
+   pnpm run create-component
+   ```
 4. Run `pnpm install` to install dependencies
 5. Run `pnpm run dev` to start the development server
 6. Run `pnpm run build` to build your components for production
@@ -125,6 +128,20 @@ export default defineConfig({
   ]
 });
 ```
+
+## Creating New Components
+
+This starter kit includes a component generator to help you create new components quickly. To use it, run:
+
+```bash
+pnpm create-component
+```
+
+The generator will:
+1. Prompt you for a component name (in kebab-case format)
+2. Validate that the name is in kebab-case and doesn't already exist
+3. Create a new component folder with an `index.ts` file
+4. Add the component definition to `twilight-bundle.json`
 
 ## Component Requirements
 

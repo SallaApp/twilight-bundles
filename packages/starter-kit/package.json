@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,html,css}\""
+    "format": "prettier --write \"src/**/*.{ts,html,css}\"",
+    "create-component": "tw-component"
   },
   "keywords": [
     "salla",
