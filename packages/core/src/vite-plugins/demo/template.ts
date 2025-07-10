@@ -152,13 +152,206 @@ export function createDemoHTML(
       element.checked ?showComponent(componentName) : hideComponent(componentName);
     }
 
-    function openFilterDrawer(){
-      const componentsFilterDrawer = document.getElementById('componentsFilterDrawer');
-      componentsFilterDrawer?.classList.add('active');
-      componentsFilterDrawer?.querySelectorAll('.visibility-checkbox')
+    function openSettingsDrawer(){
+      const settingsDrawer = document.getElementById('settingsDrawer');
+      settingsDrawer?.classList.add('active');
+      
+      // Set current visibility state for components
+      settingsDrawer?.querySelectorAll('.visibility-checkbox')
       .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
+      
+      // Set current grid settings
+      const savedGrid = Salla.storage.get('salla_demo_grid', {
+        columns: '${options.grid.columns}',
+        gap: '${options.grid.gap}',
+        minWidth: '${options.grid.minWidth}'
+      });
+      
+      // Set grid columns preset
+      const gridPresetBtns = document.querySelectorAll('.grid-preset-btn');
+      let activePresetFound = false;
+      
+      gridPresetBtns.forEach(btn => {
+        btn.classList.remove('active');
+        const columns = btn.getAttribute('data-columns');
+        
+        if (columns === savedGrid.columns) {
+          btn.classList.add('active');
+          activePresetFound = true;
+        }
+      });
+      
+      // If no preset matches, activate custom option
+      if (!activePresetFound) {
+        const customBtn = document.querySelector('.grid-preset-custom');
+        customBtn?.classList.add('active');
+        const customContainer = document.getElementById('customGridColumnsContainer');
+        if (customContainer) customContainer.style.display = 'block';
+      }
+      
+      // Set grid columns value
+      const gridColumns = document.getElementById('gridColumns');
+      if (gridColumns) gridColumns.value = savedGrid.columns;
+      
+      // Parse and set grid gap value and unit
+      const gridGapValue = document.getElementById('gridGapValue');
+      const gridGapUnit = document.getElementById('gridGapUnit');
+      
+      if (gridGapValue && gridGapUnit) {
+        const [value, unit] = parseValueAndUnit(savedGrid.gap);
+        gridGapValue.value = value;
+        setSelectedUnit(gridGapUnit, unit);
+      }
+      
+      // Parse and set min width value and unit
+      const gridMinWidthValue = document.getElementById('gridMinWidthValue');
+      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit');
+      
+      if (gridMinWidthValue && gridMinWidthUnit) {
+        const [value, unit] = parseValueAndUnit(savedGrid.minWidth);
+        gridMinWidthValue.value = value;
+        setSelectedUnit(gridMinWidthUnit, unit);
+      }
+      
+      // Set current custom CSS and JS
+      const customCSS = document.getElementById('customCSS');
+      const customJS = document.getElementById('customJS');
+      
+      if (customCSS && customJS) {
+        customCSS.value = Salla.storage.get('salla_demo_custom_css', '${options.css?.replace(/'/g, "\\'") || ''}');
+        customJS.value = Salla.storage.get('salla_demo_custom_js', '${options.js?.replace(/'/g, "\\'") || ''}');
+      }
+      
+      // Set current formbuilder settings
+      const savedFormbuilder = Salla.storage.get('salla_demo_formbuilder', {
+        languages: ${JSON.stringify(options.formbuilder.languages)},
+        defaultLanguage: '${options.formbuilder.defaultLanguage}'
+      });
+      
+      // Set language checkboxes
+      document.querySelectorAll('.language-checkbox').forEach(checkbox => {
+        const lang = checkbox.value;
+        checkbox.checked = savedFormbuilder.languages.includes(lang);
+      });
+      
+      // Set default language
+      const formbuilderDefaultLang = document.getElementById('formbuilderDefaultLang');
+      if (formbuilderDefaultLang) {
+        formbuilderDefaultLang.value = savedFormbuilder.defaultLanguage;
+      }
+      
       drawerOverlay?.classList.add('active');
       document.body.style.overflow = 'hidden';
+    }
+    
+    // Helper function to parse value and unit from CSS value
+    function parseValueAndUnit(cssValue) {
+      const match = cssValue.match(/^([\d.]+)([a-z%]*)$/);
+      if (match) {
+        return [match[1], match[2] || 'px']; // Default to px if no unit
+      }
+      return ['0', 'px']; // Default fallback
+    }
+    
+    // Helper function to set selected option in a select element
+    function setSelectedUnit(selectElement, unit) {
+      for (let i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].value === unit) {
+          selectElement.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    
+    function applySettings() {
+      // Get grid columns setting
+      let gridColumns;
+      const activePreset = document.querySelector('.grid-preset-btn.active');
+      if (activePreset && activePreset.getAttribute('data-columns') !== 'custom') {
+        gridColumns = activePreset.getAttribute('data-columns') || '${options.grid.columns}';
+      } else {
+        gridColumns = document.getElementById('gridColumns')?.value || '${options.grid.columns}';
+      }
+      
+      // Get grid gap with unit
+      const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
+      const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
+      const gridGap = gridGapValue + gridGapUnit;
+      
+      // Get min width with unit
+      const gridMinWidthValue = document.getElementById('gridMinWidthValue')?.value || '768';
+      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit')?.value || 'px';
+      const gridMinWidth = gridMinWidthValue + gridMinWidthUnit;
+      
+      // Apply grid settings
+      const componentsGrid = document.getElementById('componentsGrid');
+      if (componentsGrid) {
+        componentsGrid.style.gridTemplateColumns = gridColumns;
+        componentsGrid.style.gap = gridGap;
+      }
+      
+      // Apply custom CSS
+      const customCSS = document.getElementById('customCSS')?.value || '';
+      let customCSSElement = document.getElementById('custom-css-element');
+      if (!customCSSElement) {
+        customCSSElement = document.createElement('style');
+        customCSSElement.id = 'custom-css-element';
+        document.head.appendChild(customCSSElement);
+      }
+      customCSSElement.textContent = customCSS;
+      
+      // Apply custom JS
+      const customJS = document.getElementById('customJS')?.value || '';
+      try {
+        if (customJS) {
+          eval(customJS);
+        }
+      } catch (error) {
+        console.error('Error executing custom JS:', error);
+      }
+      
+      // Save settings to localStorage
+      Salla.storage.set('salla_demo_grid', {
+        columns: gridColumns,
+        gap: gridGap,
+        minWidth: gridMinWidth
+      });
+      
+      Salla.storage.set('salla_demo_custom_css', customCSS);
+      Salla.storage.set('salla_demo_custom_js', customJS);
+      
+      // Get selected languages from checkboxes
+      const selectedLanguages = [];
+      document.querySelectorAll('.language-checkbox:checked').forEach(checkbox => {
+        selectedLanguages.push(checkbox.value);
+      });
+      
+      // Ensure at least one language is selected
+      if (selectedLanguages.length === 0) {
+        selectedLanguages.push('en'); // Default to English if nothing selected
+      }
+      
+      // Get default language
+      const formbuilderDefaultLang = document.getElementById('formbuilderDefaultLang')?.value || '${options.formbuilder.defaultLanguage}';
+      
+      // Ensure default language is in the selected languages
+      if (!selectedLanguages.includes(formbuilderDefaultLang)) {
+        selectedLanguages.push(formbuilderDefaultLang);
+      }
+      
+      // Save formbuilder settings
+      Salla.storage.set('salla_demo_formbuilder', {
+        languages: selectedLanguages,
+        defaultLanguage: formbuilderDefaultLang
+      });
+      
+      // Close drawer
+      closeDrawer();
+      
+      // Reload page to apply formbuilder settings
+      if (document.getElementById('reload-after-save')?.checked) {
+        window.location.reload();
+      }
     }
 
     window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
@@ -439,13 +632,16 @@ export function createDemoHTML(
         bottom: 0;
         background-color: var(--bg-primary);
         width: 400px;
-        max-width: 90%;
+        max-width: 100%;
         z-index: 1000;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
         overflow-y: auto;
         opacity: 0;
         visibility: hidden;
+      }
+      #settingsDrawer {
+        width: 500px;
       }
       .drawer.active {
         opacity: 1;
@@ -600,6 +796,226 @@ export function createDemoHTML(
         height: 1.25rem;
         cursor: pointer;
       }
+      
+      /* Settings drawer styles */
+      .settings-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .settings-tab-headers {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .settings-tab-btn {
+        padding: 0.75rem 1rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+      }
+      
+      .settings-tab-btn:hover {
+        color: var(--text-primary);
+      }
+      
+      .settings-tab-btn.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+      }
+      
+      .settings-tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+      
+      .settings-tab-content.active {
+        display: block;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      .settings-section-title {
+        margin: 0 0 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .settings-section-desc {
+        margin: 0 0 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+      
+      .settings-form-group {
+        margin-bottom: 1.25rem;
+      }
+      
+      .settings-form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+      
+      .settings-input,
+      .settings-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: border-color 0.2s ease;
+      }
+      
+      .settings-input:focus,
+      .settings-textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px var(--color-primary-50);
+      }
+      
+      .settings-textarea {
+        resize: vertical;
+        min-height: 100px;
+        direction: ltr;
+        font-family: monospace;
+        color: #888;
+      }
+      
+      .settings-form-group small {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+      
+      .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+      }
+      
+      /* Language selection styles */
+      .settings-languages-container {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-primary);
+      }
+      
+      .settings-languages-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 0.5rem;
+        padding: 0.75rem;
+      }
+      
+      .settings-language-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      
+      .settings-language-item:hover {
+        background-color: var(--bg-secondary);
+      }
+      
+      .settings-language-item input {
+        margin: 0;
+      }
+      
+      .settings-language-item span {
+        font-size: 0.85rem;
+      }
+      
+      /* Grid presets styles */
+      .grid-columns-presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .grid-preset-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 40px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .grid-preset-btn:hover {
+        background-color: var(--bg-secondary);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      
+      .grid-preset-btn.active {
+        border-color: var(--color-primary);
+        background-color: var(--color-primary-50);
+      }
+      
+      .grid-preset-icon {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        letter-spacing: -2px;
+      }
+      
+      .custom-grid-columns-container {
+        margin-top: 0.75rem;
+      }
+      
+      /* Input with unit styles */
+      .settings-input-with-unit {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      
+      .settings-input-number {
+        flex: 1;
+      }
+      
+      .settings-input-unit {
+        width: 80px;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
     </style>
   </head>
   <body>
@@ -613,7 +1029,7 @@ export function createDemoHTML(
             <h1 class="title" id="pageTitle">${translations.ar.title}</h1>
           </div>
           <div class="actions">
-            <button id="toggleComponentsFilter" title="Filter components" onclick="openFilterDrawer()" class="sicon-filter"></button>
+            <button id="toggleSettings" title="Settings" onclick="openSettingsDrawer()" class="sicon-settings"></button>
             <button id="toggleTheme" title="Toggle theme">
               <i class="theme-icon moon sicon-moon"></i>
               <i class="theme-icon sun sicon-lightbulb"></i>
@@ -653,30 +1069,164 @@ export function createDemoHTML(
       </div>
     </div>
     
-    <!-- Components filter drawer -->
-    <div id="componentsFilterDrawer" class="drawer">
+    <!-- Settings drawer -->
+    <div id="settingsDrawer" class="drawer">
       <div class="drawer-header">
-        <h3>Component Visibility</h3>
+        <h3>Demo Settings</h3>
         <div class="drawer-actions">
-          <button class="drawer-close" onclick="document.getElementById('componentsFilterDrawer').classList.remove('active')">
+          <button class="drawer-close" onclick="closeDrawer()">
             <i class="sicon-cancel"></i>
           </button>
         </div>
       </div>
       <div class="drawer-content">
-        <div class="component-visibility-list">
-          ${components.map(component => `
-            <div class="visibility-item">
-              <label>
-                <input type="checkbox"
-                name="component-visibility"
-                class="visibility-checkbox" 
-                value="${component.name}"
-                onchange="toggleComponentVisibility(this)">
-                <span>${component.name}</span>
-              </label>
+        <div class="settings-tabs">
+          <div class="settings-tab-headers">
+            <button class="settings-tab-btn active" data-tab="components">Components</button>
+            <button class="settings-tab-btn" data-tab="grid">Grid</button>
+            <button class="settings-tab-btn" data-tab="custom-code">Custom Code</button>
+            <button class="settings-tab-btn" data-tab="formbuilder">Form Builder</button>
+          </div>
+          
+          <!-- Components Tab -->
+          <div class="settings-tab-content active" id="components-tab">
+            <h4 class="settings-section-title">Component Visibility</h4>
+            <p class="settings-section-desc">Select which components to display in the demo</p>
+            
+            <div class="component-visibility-list">
+              ${components.map(component => `
+                <div class="visibility-item">
+                  <label>
+                    <input type="checkbox"
+                    name="component-visibility"
+                    class="visibility-checkbox" 
+                    value="${component.name}"
+                    onchange="toggleComponentVisibility(this)">
+                    <span>${component.name}</span>
+                  </label>
+                </div>
+              `).join('')}
             </div>
-          `).join('')}
+          </div>
+          
+          <!-- Grid Tab -->
+          <div class="settings-tab-content" id="grid-tab">
+            <h4 class="settings-section-title">Grid Settings</h4>
+            <p class="settings-section-desc">Customize the component grid layout</p>
+            
+            <div class="settings-form-group">
+              <label for="gridColumnsPreset">Grid Columns Layout</label>
+              <div class="grid-columns-presets">
+                <button type="button" class="grid-preset-btn" data-columns="repeat(1, 1fr)" title="1 column">
+                  <span class="grid-preset-icon">▭</span>
+                </button>
+                <button type="button" class="grid-preset-btn" data-columns="repeat(2, 1fr)" title="2 columns">
+                  <span class="grid-preset-icon">▯ ▯</span>
+                </button>
+                <button type="button" class="grid-preset-btn" data-columns="repeat(3, 1fr)" title="3 columns">
+                  <span class="grid-preset-icon">▯▯▯</span>
+                </button>
+                <button type="button" class="grid-preset-btn" data-columns="repeat(4, 1fr)" title="4 columns">
+                  <span class="grid-preset-icon">▮▮▮▮</span>
+                </button>
+                <button type="button" class="grid-preset-btn" data-columns="repeat(auto-fill, minmax(250px, 1fr))" title="Auto-fill">
+                  <span class="grid-preset-icon">≡</span>
+                </button>
+                <button type="button" class="grid-preset-btn grid-preset-custom" data-columns="custom" title="Custom">
+                  <span class="grid-preset-icon">⚙️</span>
+                </button>
+              </div>
+              <div id="customGridColumnsContainer" class="custom-grid-columns-container" style="display: none;">
+                <input type="text" id="gridColumns" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}">
+                <small>CSS grid-template-columns value</small>
+              </div>
+            </div>
+            
+            <div class="settings-form-group">
+              <label for="gridGap">Grid Gap</label>
+              <div class="settings-input-with-unit">
+                <input type="number" id="gridGapValue" class="settings-input settings-input-number" placeholder="1.5" step="0.1" min="0">
+                <select id="gridGapUnit" class="settings-input-unit">
+                  <option value="px">px</option>
+                  <option value="rem">rem</option>
+                  <option value="em">em</option>
+                  <option value="%">%</option>
+                </select>
+              </div>
+              <small>Space between grid items</small>
+            </div>
+            
+            <div class="settings-form-group">
+              <label for="gridMinWidth">Min Width Breakpoint</label>
+              <div class="settings-input-with-unit">
+                <input type="number" id="gridMinWidthValue" class="settings-input settings-input-number" placeholder="768" min="0">
+                <select id="gridMinWidthUnit" class="settings-input-unit">
+                  <option value="px">px</option>
+                  <option value="rem">rem</option>
+                  <option value="em">em</option>
+                  <option value="%">%</option>
+                </select>
+              </div>
+              <small>Minimum width for responsive layout</small>
+            </div>
+          </div>
+          
+          <!-- Custom Code Tab -->
+          <div class="settings-tab-content" id="custom-code-tab">
+            <h4 class="settings-section-title">Custom Code</h4>
+            <p class="settings-section-desc">Add custom CSS and JavaScript</p>
+            
+            <div class="settings-form-group">
+              <label for="customCSS">Custom CSS</label>
+              <textarea id="customCSS" dir="ltr" class="settings-textarea" rows="6" placeholder="/* Add your custom CSS here */">${options.css || ''}</textarea>
+            </div>
+            
+            <div class="settings-form-group">
+              <label for="customJS">Custom JavaScript</label>
+              <textarea id="customJS" dir="ltr" class="settings-textarea" rows="6" placeholder="// Add your custom JavaScript here">${options.js || ''}</textarea>
+            </div>
+          </div>
+          
+          <!-- Form Builder Tab -->
+          <div class="settings-tab-content" id="formbuilder-tab">
+            <h4 class="settings-section-title">Form Builder Settings</h4>
+            <p class="settings-section-desc">Configure form builder options</p>
+            
+            <div class="settings-form-group">
+              <label for="formbuilderLanguages">Languages</label>
+              <div class="settings-languages-container">
+                <div class="settings-languages-list">
+                  ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                    <label class="settings-language-item">
+                      <input type="checkbox" class="language-checkbox" value="${lang}" 
+                        ${options.formbuilder.languages.includes(lang) ? 'checked' : ''}>
+                      <span>${lang}</span>
+                    </label>
+                  `).join('')}
+                </div>
+              </div>
+              <small>Select languages to include in the form builder</small>
+            </div>
+            
+            <div class="settings-form-group">
+              <label for="formbuilderDefaultLang">Default Language</label>
+              <input type="text" id="formbuilderDefaultLang" class="settings-input" placeholder="ar" value="${options.formbuilder.defaultLanguage}">
+              <small>Default language code</small>
+            </div>
+            
+            <div class="settings-form-group">
+              <label>
+                <input type="checkbox" id="reload-after-save">
+                <span>Reload page after saving settings</span>
+              </label>
+              <small>Required for form builder settings to take effect</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-actions">
+          <button class="btn btn-primary" onclick="applySettings()">Apply Settings</button>
+          <button class="btn btn-secondary" onclick="closeDrawer()">Cancel</button>
         </div>
       </div>
     </div>
@@ -718,7 +1268,41 @@ export function createDemoHTML(
       // Initialize with stored or default values
       updateLanguage(currentLang);
       updateTheme(currentTheme);
+      
 
+      function initSettings(){
+        // Initialize grid settings from localStorage
+        const savedGrid = Salla.storage.get('salla_demo_grid', {
+            columns: '${options.grid.columns}',
+            gap: '${options.grid.gap}',
+            minWidth: '${options.grid.minWidth}'
+        });
+        
+        const componentsGrid = document.getElementById('componentsGrid');
+        if (componentsGrid) {
+            componentsGrid.style.gridTemplateColumns = savedGrid.columns;
+            componentsGrid.style.gap = savedGrid.gap;
+        }
+        
+        // Apply custom CSS if saved
+        const savedCSS = Salla.storage.get('salla_demo_custom_css', '');
+        if (savedCSS) {
+            const customCSSElement = document.createElement('style');
+            customCSSElement.id = 'custom-css-element';
+            customCSSElement.textContent = savedCSS;
+            document.head.appendChild(customCSSElement);
+        }
+        
+        // Apply custom JS if saved
+        const savedJS = Salla.storage.get('salla_demo_custom_js', '');
+        if (savedJS) {
+            try {
+            eval(savedJS);
+            } catch (error) {
+            console.error('Error executing custom JS:', error);
+            }
+        }
+      }
       // Event listeners for theme and language toggles
       toggleTheme.addEventListener('click', () => {
         updateTheme(currentTheme === 'light' ? 'dark' : 'light');
@@ -728,15 +1312,56 @@ export function createDemoHTML(
         updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
       
-      // Drawer functionality
-      const drawer = document.getElementById('componentDrawer');
-      const drawerOverlay = document.getElementById('drawerOverlay');
-      const drawerClose = drawer?.querySelector('.drawer-close');
-      const drawerReset = drawer?.querySelector('.drawer-reset');
-      const drawerTitle = drawer?.querySelector('.drawer-title');
-      const drawerContent = drawer?.querySelector('.drawer-content');
+      // Tab switching functionality
+      document.querySelectorAll('.settings-tab-btn').forEach(tabBtn => {
+        tabBtn.addEventListener('click', () => {
+          const tabId = tabBtn.getAttribute('data-tab');
+          
+          // Update active tab button
+          document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          tabBtn.classList.add('active');
+          
+          // Update active tab content
+          document.querySelectorAll('.settings-tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          document.getElementById(tabId + '-tab')?.classList.add('active');
+        });
+      });
       
-      // Function to open drawer
+      // Grid preset buttons functionality
+      document.querySelectorAll('.grid-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Update active preset button
+          document.querySelectorAll('.grid-preset-btn').forEach(presetBtn => {
+            presetBtn.classList.remove('active');
+          });
+          btn.classList.add('active');
+          
+          const columns = btn.getAttribute('data-columns');
+          const customContainer = document.getElementById('customGridColumnsContainer');
+          
+          // Show/hide custom input based on selection
+          if (columns === 'custom') {
+            if (customContainer) customContainer.style.display = 'block';
+          } else {
+            if (customContainer) customContainer.style.display = 'none';
+          }
+        });
+      });
+      
+      // Drawer functionality
+      const componentDrawer = document.getElementById('componentDrawer');
+      const settingsDrawer = document.getElementById('settingsDrawer');
+      const drawerOverlay = document.getElementById('drawerOverlay');
+      const drawerClose = componentDrawer?.querySelector('.drawer-close');
+      const drawerReset = componentDrawer?.querySelector('.drawer-reset');
+      const drawerTitle = componentDrawer?.querySelector('.drawer-title');
+      const drawerContent = componentDrawer?.querySelector('.drawer-content');
+      
+      // Function to open component drawer
       function openDrawer(componentName) {
         // Inject form builder script if it's not loaded yet
         if (!document.getElementById('form-builder-3-script')) {
@@ -747,14 +1372,14 @@ export function createDemoHTML(
           document.head.appendChild(script);
         }
         
-        drawerTitle.textContent = componentName;
-        drawer.classList.add('active');
-        drawerOverlay.classList.add('active');
+        if (drawerTitle) drawerTitle.textContent = componentName;
+        componentDrawer?.classList.add('active');
+        drawerOverlay?.classList.add('active');
         document.body.style.overflow = 'hidden';
-        if(drawer.currentComponent === componentName){
+        if(componentDrawer && componentDrawer.currentComponent === componentName){
             return;
         }
-        drawer.currentComponent = componentName;
+        if (componentDrawer) componentDrawer.currentComponent = componentName;
         const schema = schemaForComponent(componentName);
 
         if(!schema){
@@ -788,16 +1413,18 @@ export function createDemoHTML(
       
       // Function to close drawer
       function closeDrawer() {
-        document.querySelectorAll('.active').forEach(element => element.classList.remove('active'));
-        drawerOverlay.classList.remove('active');
+        document.querySelectorAll('.drawer.active').forEach(element => element.classList.remove('active'));
+        drawerOverlay?.classList.remove('active');
         document.body.style.overflow = '';
       }
       
       // Function to reset settings and reload page
       function resetSettings() {
-        localStorage.removeItem('form-builder::' + drawer.currentComponent);
-        localStorage.removeItem('form-builder::data_' + drawer.currentComponent);
-        reRenderComponent(drawer.currentComponent);
+        if (componentDrawer && componentDrawer.currentComponent) {
+          localStorage.removeItem('form-builder::' + componentDrawer.currentComponent);
+          localStorage.removeItem('form-builder::data_' + componentDrawer.currentComponent);
+          reRenderComponent(componentDrawer.currentComponent);
+        }
       }
     
       
@@ -820,11 +1447,11 @@ export function createDemoHTML(
         return false;
         }
         await waitForCondition(()=>window.Salla && window.Salla.onReady, 10000, 50);
-        window.Salla.onReady(() => {
-            Salla.lang.setLocale(currentLang);  
-            const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
-            Object.keys(customComponentsSchema).forEach(name => renderComponent(name));
-        });
+        await window.Salla.onReady();
+        Salla.lang.setLocale(currentLang);  
+        const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
+        Object.keys(customComponentsSchema).forEach(name => renderComponent(name));
+        initSettings();
         })();
 
     </script>
