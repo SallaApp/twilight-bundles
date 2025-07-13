@@ -114,10 +114,10 @@ export function createDemoHTML(
             </div>
         </div>\`;
         tempDom.querySelector('.component-settings-btn').addEventListener('click', () => openDrawer(componentName));
-        const componentsGrid = document.getElementById('componentsGrid');
+        const grid = document.getElementById('componentsGrid');
         existingComponent
-          ? componentsGrid.insertBefore(tempDom.firstElementChild, existingComponent.nextSibling)
-          : componentsGrid.appendChild(tempDom.firstElementChild);
+          ? grid.insertBefore(tempDom.firstElementChild, existingComponent.nextSibling)
+          : grid.appendChild(tempDom.firstElementChild);
         tempDom.remove();
     }
         function reRenderComponent(componentName){
@@ -151,21 +151,43 @@ export function createDemoHTML(
       element.checked = Salla.storage.get('hidden-salla-components', []).includes(componentName);
       element.checked ?showComponent(componentName) : hideComponent(componentName);
     }
-
-    function openSettingsDrawer(){
-      const settingsDrawer = document.getElementById('settingsDrawer');
-      settingsDrawer?.classList.add('active');
-      
-      // Set current visibility state for components
-      settingsDrawer?.querySelectorAll('.visibility-checkbox')
-      .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
-      
-      // Set current grid settings
-      const savedGrid = Salla.storage.get('salla_demo_grid', {
+    // Get the updated gap value from localStorage
+    function getSavedGrid() {
+        return Salla.storage.get('salla_demo_grid', {
         columns: '${options.grid.columns}',
         gap: '${options.grid.gap}',
         minWidth: '${options.grid.minWidth}'
-      });
+        });
+    }
+    function getSavedLanguages(){
+        return Salla.storage.get('salla_demo_formbuilder', {
+        languages: ${JSON.stringify(options.formbuilder.languages)},
+        defaultLanguage: ${JSON.stringify(options.formbuilder.defaultLanguage)}
+        });
+    }
+
+    // ==================== BEGIN SETTINGS DRAWER ====================
+    function openSettingsDrawer(){
+      const settingsDrawer = document.getElementById('settingsDrawer');
+      if(!settingsDrawer){
+        return;
+      }
+      settingsDrawer.classList.add('active');
+      
+      drawerOverlay?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      if(settingsDrawer.is_rendered){
+        return;
+      }
+      settingsDrawer.is_rendered = true;
+      
+      // Set current visibility state for components
+      settingsDrawer.querySelectorAll('.visibility-checkbox')
+      .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
+      
+      // Set current grid settings
+      const savedGrid = getSavedGrid();
       
       // Set grid columns preset
       const gridPresetBtns = document.querySelectorAll('.grid-preset-btn');
@@ -183,35 +205,81 @@ export function createDemoHTML(
       
       // If no preset matches, activate custom option
       if (!activePresetFound) {
-        const customBtn = document.querySelector('.grid-preset-custom');
+        const customBtn = document.querySelector('.grid-preset-btn[data-columns="custom"]');
         customBtn?.classList.add('active');
-        const customContainer = document.getElementById('customGridColumnsContainer');
-        if (customContainer) customContainer.style.display = 'block';
+        
+        // Store the current value as custom value
+        const gridColumnsInput = document.getElementById('gridColumns');
+        if (gridColumnsInput) {
+          gridColumnsInput.setAttribute('data-custom-value', savedGrid.columns);
+          gridColumnsInput.readOnly = false;
+        }
       }
       
-      // Set grid columns value
-      const gridColumns = document.getElementById('gridColumns');
-      if (gridColumns) gridColumns.value = savedGrid.columns;
-      
-      // Parse and set grid gap value and unit
-      const gridGapValue = document.getElementById('gridGapValue');
-      const gridGapUnit = document.getElementById('gridGapUnit');
-      
-      if (gridGapValue && gridGapUnit) {
-        const [value, unit] = parseValueAndUnit(savedGrid.gap);
-        gridGapValue.value = value;
-        setSelectedUnit(gridGapUnit, unit);
+      // Initialize grid columns input
+      const gridColumnsInput = document.getElementById('gridColumns');
+      if (gridColumnsInput) {
+        // Initialize with saved value
+        gridColumnsInput.value = savedGrid.columns;
+        gridColumnsInput.addEventListener('input', () => {
+          // Store custom value when user edits
+          const customPreset = document.querySelector('.grid-preset-btn[data-columns="custom"]');
+          if (customPreset && customPreset.classList.contains('active')) {
+            gridColumnsInput.setAttribute('data-custom-value', gridColumnsInput.value);
+          }
+          // Apply settings immediately for live update
+          applySettings();
+        });
       }
-      
-      // Parse and set min width value and unit
-      const gridMinWidthValue = document.getElementById('gridMinWidthValue');
-      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit');
-      
-      if (gridMinWidthValue && gridMinWidthUnit) {
-        const [value, unit] = parseValueAndUnit(savedGrid.minWidth);
-        gridMinWidthValue.value = value;
-        setSelectedUnit(gridMinWidthUnit, unit);
+        const gridGapInput = document.getElementById('gridGapValue');
+        const gridGapUnitInput = document.getElementById('gridGapUnit');
+      if(gridGapInput && savedGrid.gap){
+        gridGapInput.value = savedGrid.gap.match(/[\\d\\.]+/)?.[0];
+        gridGapUnitInput.value = savedGrid.gap.match(/[a-z%]+/)?.[0];
       }
+      // Add event listeners to grid gap inputs for live updates
+      gridGapInput?.addEventListener('input', () => {
+        const gridGapValue = gridGapInput?.value || '1';
+        const gridGapUnit = gridGapUnitInput?.value || 'rem';
+        const gridGap = gridGapValue + gridGapUnit;
+        
+        // Update the gap in real-time
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+          grid.style.gap = gridGap;
+        }
+
+        const savedGrid = getSavedGrid();
+        
+        
+        Salla.storage.set('salla_demo_grid', {...savedGrid, gap: gridGap});
+      });
+      
+      gridGapUnitInput?.addEventListener('change', () => {
+        const gridGapValue = gridGapInput.value || '1';
+        const gridGapUnit = gridGapUnitInput.value || 'rem';
+        const gridGap = gridGapValue + gridGapUnit;
+        
+        // Update the gap in real-time
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+          grid.style.gap = gridGap;
+        }
+        
+        Salla.storage.set('salla_demo_grid', {...getSavedGrid(), gap: gridGap});
+      });
+      
+      document.getElementById('customCSS')?.addEventListener('input', debounce(() => {
+        applySettings();
+      }, 500));
+      
+      document.getElementById('customJS')?.addEventListener('input', debounce(() => {
+        applySettings();
+      }, 500));
+      
+      document.getElementById('formbuilderLanguages')?.addEventListener('change', () => applySettings());
+      document.getElementById('formbuilderDefaultLang')?.addEventListener('change', () => applySettings());
+      
       
       // Set current custom CSS and JS
       const customCSS = document.getElementById('customCSS');
@@ -223,28 +291,15 @@ export function createDemoHTML(
       }
       
       // Set current formbuilder settings
-      const savedFormbuilder = Salla.storage.get('salla_demo_formbuilder', {
-        languages: ${JSON.stringify(options.formbuilder.languages)},
-        defaultLanguage: '${options.formbuilder.defaultLanguage}'
-      });
+      const savedFormbuilder = getSavedLanguages();
       
       // Set language checkboxes
-      document.querySelectorAll('.language-checkbox').forEach(checkbox => {
-        const lang = checkbox.value;
-        checkbox.checked = savedFormbuilder.languages.includes(lang);
-      });
+      document.querySelectorAll('#formbuilderLanguages option').forEach(option => option.selected = savedFormbuilder.languages.includes(option.value));
       
-      // Set default language
-      const formbuilderDefaultLang = document.getElementById('formbuilderDefaultLang');
-      if (formbuilderDefaultLang) {
-        formbuilderDefaultLang.value = savedFormbuilder.defaultLanguage;
-      }
-      
-      drawerOverlay?.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      document.getElementById('formbuilderDefaultLang').value = savedFormbuilder.defaultLanguage;
     }
+    // ==================== END SETTINGS DRAWER ====================
     
-    // Helper function to parse value and unit from CSS value
     function parseValueAndUnit(cssValue) {
       const match = cssValue.match(/^([\d.]+)([a-z%]*)$/);
       if (match) {
@@ -262,32 +317,72 @@ export function createDemoHTML(
         }
       }
     }
+
+    function getGridColumns() {
+      const gridColumnsInput = document.getElementById('gridColumns');
+      return gridColumnsInput?.value || '${options.grid.columns}';
+    }
+    
+    function updateGridBasedOnItemCount() {
+      const grid = document.getElementById('componentsGrid');
+      if (!grid) return;
+      
+      const gridItems = grid.querySelectorAll(':scope > *');
+      
+      if (gridItems.length <= 2) {
+        // For 1-2 items, use auto-fit with full width
+        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
+        // Reset all items grid-column property
+        gridItems.forEach(item => item.style.gridColumn = '');
+      } else {
+        // For 3+ items, use 3 columns with first item spanning all columns
+        grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        // Reset all items first
+        gridItems.forEach(item => item.style.gridColumn = '');
+        // Make first item span 3 columns
+        if (gridItems[0]) gridItems[0].style.gridColumn = 'span 3';
+      }
+    }
     
     function applySettings() {
-      // Get grid columns setting
-      let gridColumns;
       const activePreset = document.querySelector('.grid-preset-btn.active');
-      if (activePreset && activePreset.getAttribute('data-columns') !== 'custom') {
-        gridColumns = activePreset.getAttribute('data-columns') || '${options.grid.columns}';
+      const grid = document.getElementById('componentsGrid');
+      if (!grid) return;
+      
+      // Apply special auto-fill behavior if selected
+      if (activePreset && activePreset.getAttribute('data-columns') === 'auto-fill') {
+        updateGridBasedOnItemCount();
       } else {
-        gridColumns = document.getElementById('gridColumns')?.value || '${options.grid.columns}';
+        // Apply normal grid columns
+        const gridColumns = getGridColumns();
+        grid.style.gridTemplateColumns = gridColumns;
+        // Reset all items grid-column property
+        const gridItems = grid.querySelectorAll(':scope > *');
+        gridItems.forEach(item => item.style.gridColumn = '');
       }
       
       // Get grid gap with unit
-      const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
+      const gridGapValue = document.getElementById('gridGapValue')?.value || '1';
       const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
       const gridGap = gridGapValue + gridGapUnit;
       
-      // Get min width with unit
-      const gridMinWidthValue = document.getElementById('gridMinWidthValue')?.value || '768';
-      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit')?.value || 'px';
-      const gridMinWidth = gridMinWidthValue + gridMinWidthUnit;
-      
-      // Apply grid settings
-      const componentsGrid = document.getElementById('componentsGrid');
-      if (componentsGrid) {
-        componentsGrid.style.gridTemplateColumns = gridColumns;
-        componentsGrid.style.gap = gridGap;
+      // Apply grid gap
+      if (grid) {
+        grid.style.gap = gridGap;
+        
+        // Ensure grid gap is saved in localStorage
+        const savedGrid = Salla.storage.get('salla_demo_grid', {
+          columns: grid.style.gridTemplateColumns || '${options.grid.columns}',
+          gap: '${options.grid.gap}',
+          minWidth: '${options.grid.minWidth}'
+        });
+        
+        // Update only the gap property
+        Salla.storage.set('salla_demo_grid', {
+          columns: savedGrid.columns,
+          gap: gridGap,
+          minWidth: savedGrid.minWidth
+        });
       }
       
       // Apply custom CSS
@@ -312,23 +407,21 @@ export function createDemoHTML(
       
       // Save settings to localStorage
       Salla.storage.set('salla_demo_grid', {
-        columns: gridColumns,
+        columns: activePreset && activePreset.getAttribute('data-columns') === 'auto-fill' ? 'auto-fill' : getGridColumns(),
         gap: gridGap,
-        minWidth: gridMinWidth
+        minWidth: '${options.grid.minWidth}' // Use backend value only
       });
       
       Salla.storage.set('salla_demo_custom_css', customCSS);
       Salla.storage.set('salla_demo_custom_js', customJS);
       
-      // Get selected languages from checkboxes
-      const selectedLanguages = [];
-      document.querySelectorAll('.language-checkbox:checked').forEach(checkbox => {
-        selectedLanguages.push(checkbox.value);
-      });
+      // Get selected languages from multi-select
+      const formbuilderLanguagesSelect = document.getElementById('formbuilderLanguages');
+      const selectedLanguages = Array.from(formbuilderLanguagesSelect?.selectedOptions || []).map(option => option.value);
       
       // Ensure at least one language is selected
       if (selectedLanguages.length === 0) {
-        selectedLanguages.push('en'); // Default to English if nothing selected
+        selectedLanguages.push('ar'); // Default to English if nothing selected
       }
       
       // Get default language
@@ -337,6 +430,9 @@ export function createDemoHTML(
       // Ensure default language is in the selected languages
       if (!selectedLanguages.includes(formbuilderDefaultLang)) {
         selectedLanguages.push(formbuilderDefaultLang);
+        // Also select it in the UI
+        const option = Array.from(formbuilderLanguagesSelect?.options || []).find(opt => opt.value === formbuilderDefaultLang);
+        if (option) option.selected = true;
       }
       
       // Save formbuilder settings
@@ -345,13 +441,8 @@ export function createDemoHTML(
         defaultLanguage: formbuilderDefaultLang
       });
       
-      // Close drawer
-      closeDrawer();
-      
-      // Reload page to apply formbuilder settings
-      if (document.getElementById('reload-after-save')?.checked) {
-        window.location.reload();
-      }
+      // Reset component settings drawer on form-builder changes
+      resetComponentSettings();
     }
 
     window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
@@ -1118,26 +1209,26 @@ export function createDemoHTML(
               <label for="gridColumnsPreset">Grid Columns Layout</label>
               <div class="grid-columns-presets">
                 <button type="button" class="grid-preset-btn" data-columns="repeat(1, 1fr)" title="1 column">
-                  <span class="grid-preset-icon">▭</span>
+                  <span class="grid-preset-icon sicon-inbox-multi"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(2, 1fr)" title="2 columns">
-                  <span class="grid-preset-icon">▯ ▯</span>
+                  <span class="grid-preset-icon sicon-layout-grid"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(3, 1fr)" title="3 columns">
-                  <span class="grid-preset-icon">▯▯▯</span>
+                  <span class="grid-preset-icon sicon-grid"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(4, 1fr)" title="4 columns">
                   <span class="grid-preset-icon">▮▮▮▮</span>
                 </button>
-                <button type="button" class="grid-preset-btn" data-columns="repeat(auto-fill, minmax(250px, 1fr))" title="Auto-fill">
-                  <span class="grid-preset-icon">≡</span>
+                <button type="button" class="grid-preset-btn" data-columns="auto-fill" title="Auto-fill">
+                  <span class="grid-preset-icon sicon-window-layout"></span>
                 </button>
                 <button type="button" class="grid-preset-btn grid-preset-custom" data-columns="custom" title="Custom">
-                  <span class="grid-preset-icon">⚙️</span>
+                  <span class="grid-preset-icon sicon-settings"></span>
                 </button>
               </div>
-              <div id="customGridColumnsContainer" class="custom-grid-columns-container" style="display: none;">
-                <input type="text" id="gridColumns" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}">
+              <div id="customGridColumnsContainer" class="custom-grid-columns-container">
+                <input type="text" id="gridColumns" dir="ltr" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}" data-custom-value="${options.grid.columns}">
                 <small>CSS grid-template-columns value</small>
               </div>
             </div>
@@ -1145,7 +1236,7 @@ export function createDemoHTML(
             <div class="settings-form-group">
               <label for="gridGap">Grid Gap</label>
               <div class="settings-input-with-unit">
-                <input type="number" id="gridGapValue" class="settings-input settings-input-number" placeholder="1.5" step="0.1" min="0">
+                <input type="number" id="gridGapValue" class="settings-input settings-input-number" placeholder="1" step="0.1" min="0">
                 <select id="gridGapUnit" class="settings-input-unit">
                   <option value="px">px</option>
                   <option value="rem">rem</option>
@@ -1156,19 +1247,7 @@ export function createDemoHTML(
               <small>Space between grid items</small>
             </div>
             
-            <div class="settings-form-group">
-              <label for="gridMinWidth">Min Width Breakpoint</label>
-              <div class="settings-input-with-unit">
-                <input type="number" id="gridMinWidthValue" class="settings-input settings-input-number" placeholder="768" min="0">
-                <select id="gridMinWidthUnit" class="settings-input-unit">
-                  <option value="px">px</option>
-                  <option value="rem">rem</option>
-                  <option value="em">em</option>
-                  <option value="%">%</option>
-                </select>
-              </div>
-              <small>Minimum width for responsive layout</small>
-            </div>
+            <!-- Min Width Breakpoint is now handled by backend only -->
           </div>
           
           <!-- Custom Code Tab -->
@@ -1194,40 +1273,26 @@ export function createDemoHTML(
             
             <div class="settings-form-group">
               <label for="formbuilderLanguages">Languages</label>
-              <div class="settings-languages-container">
-                <div class="settings-languages-list">
-                  ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
-                    <label class="settings-language-item">
-                      <input type="checkbox" class="language-checkbox" value="${lang}" 
-                        ${options.formbuilder.languages.includes(lang) ? 'checked' : ''}>
-                      <span>${lang}</span>
-                    </label>
-                  `).join('')}
-                </div>
-              </div>
-              <small>Select languages to include in the form builder</small>
+              <select id="formbuilderLanguages" class="settings-input" multiple>
+                ${['ar','en','bg','cs','da','de','el','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                  <option value="${lang}" ${options.formbuilder.languages.includes(lang) ? 'selected' : ''}>${lang}</option>
+                `).join('')}
+              </select>
             </div>
             
             <div class="settings-form-group">
               <label for="formbuilderDefaultLang">Default Language</label>
-              <input type="text" id="formbuilderDefaultLang" class="settings-input" placeholder="ar" value="${options.formbuilder.defaultLanguage}">
-              <small>Default language code</small>
-            </div>
-            
-            <div class="settings-form-group">
-              <label>
-                <input type="checkbox" id="reload-after-save">
-                <span>Reload page after saving settings</span>
-              </label>
-              <small>Required for form builder settings to take effect</small>
+              <select id="formbuilderDefaultLang" class="settings-input">
+                ${['ar','en','bg','cs','da','de','el','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                  <option value="${lang}" ${options.formbuilder.defaultLanguage === lang ? 'selected' : ''}>${lang}</option>
+                `).join('')}
+              </select>
+              <small>Default language for the form builder</small>
             </div>
           </div>
         </div>
         
-        <div class="settings-actions">
-          <button class="btn btn-primary" onclick="applySettings()">Apply Settings</button>
-          <button class="btn btn-secondary" onclick="closeDrawer()">Cancel</button>
-        </div>
+        <!-- Footer removed as requested -->
       </div>
     </div>
     
@@ -1235,6 +1300,15 @@ export function createDemoHTML(
       const translations = ${JSON.stringify(translations)};
       const toggleTheme = document.getElementById('toggleTheme');
       const toggleLang = document.getElementById('toggleLang');
+      
+      // Simple debounce function to prevent too many updates
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
       
       // Get stored preferences or use defaults
       let currentLang = localStorage.getItem('salla_demo_lang') || 'ar';
@@ -1272,16 +1346,55 @@ export function createDemoHTML(
 
       function initSettings(){
         // Initialize grid settings from localStorage
-        const savedGrid = Salla.storage.get('salla_demo_grid', {
-            columns: '${options.grid.columns}',
-            gap: '${options.grid.gap}',
-            minWidth: '${options.grid.minWidth}'
-        });
+        const savedGrid = getSavedGrid();
         
-        const componentsGrid = document.getElementById('componentsGrid');
-        if (componentsGrid) {
-            componentsGrid.style.gridTemplateColumns = savedGrid.columns;
-            componentsGrid.style.gap = savedGrid.gap;
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+            // Apply grid settings immediately
+            if (savedGrid.columns === 'auto-fill') {
+                // Apply special auto-fill behavior
+                updateGridBasedOnItemCount();
+            } else {
+                // Apply normal grid columns
+                grid.style.gridTemplateColumns = savedGrid.columns;
+            }
+            grid.style.gap = savedGrid.gap;
+        }
+        
+        // Initialize grid gap inputs with saved values
+        const gapMatch = savedGrid.gap.match(/([\d.]+)([a-z%]+)/);
+        if (gapMatch && document.getElementById('gridGapValue') && document.getElementById('gridGapUnit')) {
+            const [_, gapValue, gapUnit] = gapMatch;
+            document.getElementById('gridGapValue').value = gapValue;
+            document.getElementById('gridGapUnit').value = gapUnit;
+        }
+        
+        // Initialize grid preset buttons based on saved columns
+        const gridColumnsInput = document.getElementById('gridColumns');
+        if (gridColumnsInput) {
+            gridColumnsInput.value = savedGrid.columns;
+            
+            // Set the active preset button
+            document.querySelectorAll('.grid-preset-btn').forEach(btn => {
+                const columns = btn.getAttribute('data-columns');
+                if (columns === savedGrid.columns || 
+                    (columns === 'auto-fill' && savedGrid.columns === 'auto-fill') || 
+                    (columns === 'custom' && !['1', '2', '3', '4', 'auto-fill'].includes(savedGrid.columns))) {
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.grid-preset-btn').forEach(b => b.classList.remove('active'));
+                    // Add active class to this button
+                    btn.classList.add('active');
+                    
+                    // Handle custom preset
+                    if (columns === 'custom') {
+                        gridColumnsInput.readOnly = false;
+                        gridColumnsInput.setAttribute('data-custom-value', savedGrid.columns);
+                    } else {
+                        gridColumnsInput.readOnly = true;
+                    }
+                }
+            });
         }
         
         // Apply custom CSS if saved
@@ -1312,45 +1425,62 @@ export function createDemoHTML(
         updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
       
-      // Tab switching functionality
-      document.querySelectorAll('.settings-tab-btn').forEach(tabBtn => {
-        tabBtn.addEventListener('click', () => {
-          const tabId = tabBtn.getAttribute('data-tab');
+      // Settings tabs functionality
+      document.querySelectorAll('.settings-tab-btn').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          if (!tabId) return;
           
-          // Update active tab button
-          document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
+          // Update active tab
+          document.querySelectorAll('.settings-tab-btn').forEach(t => {
+            t.classList.remove('active');
           });
-          tabBtn.classList.add('active');
+          tab.classList.add('active');
           
-          // Update active tab content
+          // Update active content
           document.querySelectorAll('.settings-tab-content').forEach(content => {
             content.classList.remove('active');
           });
           document.getElementById(tabId + '-tab')?.classList.add('active');
+          
+          // Apply settings immediately when switching tabs
+          applySettings();
         });
       });
       
       // Grid preset buttons functionality
       document.querySelectorAll('.grid-preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          // Update active preset button
-          document.querySelectorAll('.grid-preset-btn').forEach(presetBtn => {
-            presetBtn.classList.remove('active');
-          });
+          // Remove active class from all buttons
+          document.querySelectorAll('.grid-preset-btn').forEach(b => b.classList.remove('active'));
+          // Add active class to clicked button
           btn.classList.add('active');
           
           const columns = btn.getAttribute('data-columns');
-          const customContainer = document.getElementById('customGridColumnsContainer');
+          const gridColumns = document.getElementById('gridColumns');
           
-          // Show/hide custom input based on selection
-          if (columns === 'custom') {
-            if (customContainer) customContainer.style.display = 'block';
-          } else {
-            if (customContainer) customContainer.style.display = 'none';
+          if (gridColumns) {
+            // If custom preset, enable input and set to custom value
+            if (columns === 'custom') {
+              gridColumns.readOnly = false;
+              gridColumns.value = gridColumns.getAttribute('data-custom-value') || 'repeat(auto-fill, minmax(300px, 1fr))';
+            } 
+            // If auto-fill preset, disable input and set special value
+            else if (columns === 'auto-fill') {
+              gridColumns.readOnly = true;
+              gridColumns.value = 'auto-fill';
+            }
+            // For other presets, disable input and set preset value
+            else {
+              gridColumns.readOnly = true;
+              gridColumns.value = columns;
+            }
           }
+          
+          // Apply settings immediately
+          applySettings();
+          });
         });
-      });
       
       // Drawer functionality
       const componentDrawer = document.getElementById('componentDrawer');
@@ -1394,7 +1524,7 @@ export function createDemoHTML(
               </div>
             \`;
         }
-        
+        const savedFormbuilder = getSavedLanguages();
         drawerContent.innerHTML = \`
             <form-builder-3
              form-key="form-builder-3"
@@ -1405,8 +1535,8 @@ export function createDemoHTML(
              direction="v"
              button="start"
              css-url="${formbuilderAssets.join(',')}"
-             language-list="${options.formbuilder.languages.join(',')}"
-             default-language="${options.formbuilder.defaultLanguage}"
+             language-list="\${savedFormbuilder.languages.join(',')}"
+             default-language="\${savedFormbuilder.defaultLanguage}"
              submit-label="\${__demoTrans('saveSettings')}"></form-builder-3>
         \`;
       }
@@ -1416,6 +1546,34 @@ export function createDemoHTML(
         document.querySelectorAll('.drawer.active').forEach(element => element.classList.remove('active'));
         drawerOverlay?.classList.remove('active');
         document.body.style.overflow = '';
+      }
+      
+      function resetComponentSettings() {
+        // Reset any component settings that need to be updated when form-builder settings change
+        // Find all form-builder components and reset them
+        const formComponents = document.querySelectorAll('[data-component-type="form-builder"]');
+        formComponents.forEach(component => {
+          // Trigger a reset or re-render for the component
+          component.classList.add('settings-updated');
+          setTimeout(() => {
+            component.classList.remove('settings-updated');
+          }, 1000);
+        });
+        
+        // Trigger custom event for components to listen to
+        document.dispatchEvent(new CustomEvent('formbuilder-settings-changed', {
+          detail: {
+            timestamp: new Date().getTime()
+          }
+        }));
+        
+        // Close the component drawer if it's open
+        const componentDrawer = document.getElementById('componentDrawer');
+        if (componentDrawer?.classList.contains('active')) {
+          componentDrawer.classList.remove('active');
+          document.getElementById('drawerOverlay')?.classList.remove('active');
+          document.body.style.overflow = '';
+        }
       }
       
       // Function to reset settings and reload page
@@ -1450,7 +1608,7 @@ export function createDemoHTML(
         await window.Salla.onReady();
         Salla.lang.setLocale(currentLang);  
         const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
-        Object.keys(customComponentsSchema).forEach(name => renderComponent(name));
+        Object.keys(window.customComponentsSchema || {}).forEach(name => renderComponent(name));
         initSettings();
         })();
 
