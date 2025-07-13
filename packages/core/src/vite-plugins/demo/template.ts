@@ -212,10 +212,53 @@ export function createDemoHTML(
       
       // Add event listeners to grid gap inputs for live updates
       document.getElementById('gridGapValue')?.addEventListener('input', () => {
-        applySettings();
+        const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
+        const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
+        const gridGap = gridGapValue + gridGapUnit;
+        
+        // Update the gap in real-time
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+          grid.style.gap = gridGap;
+        }
+        
+        // Save the updated gap value to localStorage
+        const savedGrid = Salla.storage.get('salla_demo_grid', {
+          columns: '${options.grid.columns}',
+          gap: '${options.grid.gap}',
+          minWidth: '${options.grid.minWidth}'
+        });
+        
+        Salla.storage.set('salla_demo_grid', {
+          columns: savedGrid.columns,
+          gap: gridGap,
+          minWidth: savedGrid.minWidth
+        });
       });
+      
       document.getElementById('gridGapUnit')?.addEventListener('change', () => {
-        applySettings();
+        const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
+        const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
+        const gridGap = gridGapValue + gridGapUnit;
+        
+        // Update the gap in real-time
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+          grid.style.gap = gridGap;
+        }
+        
+        // Save the updated gap value to localStorage
+        const savedGrid = Salla.storage.get('salla_demo_grid', {
+          columns: '${options.grid.columns}',
+          gap: '${options.grid.gap}',
+          minWidth: '${options.grid.minWidth}'
+        });
+        
+        Salla.storage.set('salla_demo_grid', {
+          columns: savedGrid.columns,
+          gap: gridGap,
+          minWidth: savedGrid.minWidth
+        });
       });
       
       // Min Width Breakpoint is now handled by backend only
@@ -359,6 +402,20 @@ export function createDemoHTML(
       // Apply grid gap
       if (grid) {
         grid.style.gap = gridGap;
+        
+        // Ensure grid gap is saved in localStorage
+        const savedGrid = Salla.storage.get('salla_demo_grid', {
+          columns: grid.style.gridTemplateColumns || '${options.grid.columns}',
+          gap: '${options.grid.gap}',
+          minWidth: '${options.grid.minWidth}'
+        });
+        
+        // Update only the gap property
+        Salla.storage.set('salla_demo_grid', {
+          columns: savedGrid.columns,
+          gap: gridGap,
+          minWidth: savedGrid.minWidth
+        });
       }
       
       // Apply custom CSS
