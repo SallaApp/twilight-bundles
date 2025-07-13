@@ -114,10 +114,10 @@ export function createDemoHTML(
             </div>
         </div>\`;
         tempDom.querySelector('.component-settings-btn').addEventListener('click', () => openDrawer(componentName));
-        const componentsGrid = document.getElementById('componentsGrid');
+        const grid = document.getElementById('componentsGrid');
         existingComponent
-          ? componentsGrid.insertBefore(tempDom.firstElementChild, existingComponent.nextSibling)
-          : componentsGrid.appendChild(tempDom.firstElementChild);
+          ? grid.insertBefore(tempDom.firstElementChild, existingComponent.nextSibling)
+          : grid.appendChild(tempDom.firstElementChild);
         tempDom.remove();
     }
         function reRenderComponent(componentName){
@@ -197,6 +197,7 @@ export function createDemoHTML(
       // Initialize grid columns input
       const gridColumnsInput = document.getElementById('gridColumns');
       if (gridColumnsInput) {
+        // Initialize with saved value
         gridColumnsInput.value = savedGrid.columns;
         gridColumnsInput.addEventListener('input', () => {
           // Store custom value when user edits
@@ -204,28 +205,59 @@ export function createDemoHTML(
           if (customPreset && customPreset.classList.contains('active')) {
             gridColumnsInput.setAttribute('data-custom-value', gridColumnsInput.value);
           }
+          // Apply settings immediately for live update
           applySettings();
         });
       }
       
+      // Add event listeners to grid gap inputs for live updates
+      document.getElementById('gridGapValue')?.addEventListener('input', () => {
+        applySettings();
+      });
+      document.getElementById('gridGapUnit')?.addEventListener('change', () => {
+        applySettings();
+      });
+      
+      // Min Width Breakpoint is now handled by backend only
+      
+      // Add event listeners to custom CSS input for live updates
+      document.getElementById('customCSS')?.addEventListener('input', debounce(() => {
+        applySettings();
+      }, 500));
+      
+      // Add event listeners to custom JS input for live updates
+      document.getElementById('customJS')?.addEventListener('input', debounce(() => {
+        applySettings();
+      }, 500));
+      
+      // Add event listeners to form builder language checkboxes for live updates
+      document.querySelectorAll('.language-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          applySettings();
+        });
+      });
+      
+      // Add event listener to form builder default language select for live updates
+      document.getElementById('formbuilderDefaultLang')?.addEventListener('change', () => {
+        applySettings();
+      });
+      
       // Parse and set grid gap value and unit
       const gridGapValue = document.getElementById('gridGapValue');
       const gridGapUnit = document.getElementById('gridGapUnit');
-      
       if (gridGapValue && gridGapUnit) {
-        const [value, unit] = parseValueAndUnit(savedGrid.gap);
-        gridGapValue.value = value;
-        setSelectedUnit(gridGapUnit, unit);
-      }
-      
-      // Parse and set min width value and unit
-      const gridMinWidthValue = document.getElementById('gridMinWidthValue');
-      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit');
-      
-      if (gridMinWidthValue && gridMinWidthUnit) {
-        const [value, unit] = parseValueAndUnit(savedGrid.minWidth);
-        gridMinWidthValue.value = value;
-        setSelectedUnit(gridMinWidthUnit, unit);
+        // Parse saved grid gap
+        const savedGap = savedGrid.gap;
+        const gapMatch = savedGap.match(/([\d.]+)([a-z%]+)/);
+        if (gapMatch) {
+          const [_, value, unit] = gapMatch;
+          gridGapValue.value = value;
+          gridGapUnit.value = unit;
+        } else {
+          // Default values
+          gridGapValue.value = '1.5';
+          gridGapUnit.value = 'rem';
+        }
       }
       
       // Set current custom CSS and JS
@@ -284,19 +316,19 @@ export function createDemoHTML(
     }
     
     function updateGridBasedOnItemCount() {
-      const componentsGrid = document.getElementById('componentsGrid');
-      if (!componentsGrid) return;
+      const grid = document.getElementById('componentsGrid');
+      if (!grid) return;
       
-      const gridItems = componentsGrid.querySelectorAll(':scope > *');
+      const gridItems = grid.querySelectorAll(':scope > *');
       
       if (gridItems.length <= 2) {
         // For 1-2 items, use auto-fit with full width
-        componentsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
+        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
         // Reset all items grid-column property
         gridItems.forEach(item => item.style.gridColumn = '');
       } else {
         // For 3+ items, use 3 columns with first item spanning all columns
-        componentsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
         // Reset all items first
         gridItems.forEach(item => item.style.gridColumn = '');
         // Make first item span 3 columns
@@ -306,8 +338,8 @@ export function createDemoHTML(
     
     function applySettings() {
       const activePreset = document.querySelector('.grid-preset-btn.active');
-      const componentsGrid = document.getElementById('componentsGrid');
-      if (!componentsGrid) return;
+      const grid = document.getElementById('componentsGrid');
+      if (!grid) return;
       
       // Apply special auto-fill behavior if selected
       if (activePreset && activePreset.getAttribute('data-columns') === 'auto-fill') {
@@ -315,9 +347,9 @@ export function createDemoHTML(
       } else {
         // Apply normal grid columns
         const gridColumns = getGridColumns();
-        componentsGrid.style.gridTemplateColumns = gridColumns;
+        grid.style.gridTemplateColumns = gridColumns;
         // Reset all items grid-column property
-        const gridItems = componentsGrid.querySelectorAll(':scope > *');
+        const gridItems = grid.querySelectorAll(':scope > *');
         gridItems.forEach(item => item.style.gridColumn = '');
       }
       
@@ -326,15 +358,9 @@ export function createDemoHTML(
       const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
       const gridGap = gridGapValue + gridGapUnit;
       
-      // Get min width with unit
-      const gridMinWidthValue = document.getElementById('gridMinWidthValue')?.value || '768';
-      const gridMinWidthUnit = document.getElementById('gridMinWidthUnit')?.value || 'px';
-      const gridMinWidth = gridMinWidthValue + gridMinWidthUnit;
-      
       // Apply grid gap
-      const componentsGrid = document.getElementById('componentsGrid');
-      if (componentsGrid) {
-        componentsGrid.style.gap = gridGap;
+      if (grid) {
+        grid.style.gap = gridGap;
       }
       
       // Apply custom CSS
@@ -359,9 +385,9 @@ export function createDemoHTML(
       
       // Save settings to localStorage
       Salla.storage.set('salla_demo_grid', {
-        columns: gridColumns,
+        columns: activePreset && activePreset.getAttribute('data-columns') === 'auto-fill' ? 'auto-fill' : getGridColumns(),
         gap: gridGap,
-        minWidth: gridMinWidth
+        minWidth: '${options.grid.minWidth}' // Use backend value only
       });
       
       Salla.storage.set('salla_demo_custom_css', customCSS);
@@ -391,9 +417,6 @@ export function createDemoHTML(
         languages: selectedLanguages,
         defaultLanguage: formbuilderDefaultLang
       });
-      
-      // Close drawer
-      closeDrawer();
       
       // Reload page to apply formbuilder settings
       if (document.getElementById('reload-after-save')?.checked) {
@@ -1203,19 +1226,7 @@ export function createDemoHTML(
               <small>Space between grid items</small>
             </div>
             
-            <div class="settings-form-group">
-              <label for="gridMinWidth">Min Width Breakpoint</label>
-              <div class="settings-input-with-unit">
-                <input type="number" id="gridMinWidthValue" class="settings-input settings-input-number" placeholder="768" min="0">
-                <select id="gridMinWidthUnit" class="settings-input-unit">
-                  <option value="px">px</option>
-                  <option value="rem">rem</option>
-                  <option value="em">em</option>
-                  <option value="%">%</option>
-                </select>
-              </div>
-              <small>Minimum width for responsive layout</small>
-            </div>
+            <!-- Min Width Breakpoint is now handled by backend only -->
           </div>
           
           <!-- Custom Code Tab -->
@@ -1273,7 +1284,7 @@ export function createDemoHTML(
         
         <div class="settings-actions">
           <button class="btn btn-primary" onclick="applySettings()">Apply Settings</button>
-          <button class="btn btn-secondary" onclick="closeDrawer()">Cancel</button>
+          <button class="btn btn-secondary" onclick="closeDrawer()">Close Drawer</button>
         </div>
       </div>
     </div>
@@ -1282,6 +1293,15 @@ export function createDemoHTML(
       const translations = ${JSON.stringify(translations)};
       const toggleTheme = document.getElementById('toggleTheme');
       const toggleLang = document.getElementById('toggleLang');
+      
+      // Simple debounce function to prevent too many updates
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
       
       // Get stored preferences or use defaults
       let currentLang = localStorage.getItem('salla_demo_lang') || 'ar';
@@ -1325,10 +1345,18 @@ export function createDemoHTML(
             minWidth: '${options.grid.minWidth}'
         });
         
-        const componentsGrid = document.getElementById('componentsGrid');
-        if (componentsGrid) {
-            componentsGrid.style.gridTemplateColumns = savedGrid.columns;
-            componentsGrid.style.gap = savedGrid.gap;
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+            grid.style.gridTemplateColumns = savedGrid.columns;
+            grid.style.gap = savedGrid.gap;
+        }
+        
+        // Initialize grid gap inputs with saved values
+        const gapMatch = savedGrid.gap.match(/([\d.]+)([a-z%]+)/);
+        if (gapMatch && document.getElementById('gridGapValue') && document.getElementById('gridGapUnit')) {
+            const [_, gapValue, gapUnit] = gapMatch;
+            document.getElementById('gridGapValue').value = gapValue;
+            document.getElementById('gridGapUnit').value = gapUnit;
         }
         
         // Apply custom CSS if saved
@@ -1359,66 +1387,62 @@ export function createDemoHTML(
         updateLanguage(currentLang === 'ar' ? 'en' : 'ar');
       });
       
-      // Tab switching functionality
-      document.querySelectorAll('.settings-tab-btn').forEach(tabBtn => {
-        tabBtn.addEventListener('click', () => {
-          const tabId = tabBtn.getAttribute('data-tab');
+      // Settings tabs functionality
+      document.querySelectorAll('.settings-tab-btn').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          if (!tabId) return;
           
-          // Update active tab button
-          document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
+          // Update active tab
+          document.querySelectorAll('.settings-tab-btn').forEach(t => {
+            t.classList.remove('active');
           });
-          tabBtn.classList.add('active');
+          tab.classList.add('active');
           
-          // Update active tab content
+          // Update active content
           document.querySelectorAll('.settings-tab-content').forEach(content => {
             content.classList.remove('active');
           });
           document.getElementById(tabId + '-tab')?.classList.add('active');
+          
+          // Apply settings immediately when switching tabs
+          applySettings();
         });
       });
       
       // Grid preset buttons functionality
       document.querySelectorAll('.grid-preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          // Update active preset button
-          document.querySelectorAll('.grid-preset-btn').forEach(presetBtn => presetBtn.classList.remove('active'));
+          // Remove active class from all buttons
+          document.querySelectorAll('.grid-preset-btn').forEach(b => b.classList.remove('active'));
+          // Add active class to clicked button
           btn.classList.add('active');
           
           const columns = btn.getAttribute('data-columns');
           const gridColumns = document.getElementById('gridColumns');
-          if(!gridColumns){
-            console.error('Grid columns element not found: document.getElementById("gridColumns")');
-            return;
+          
+          if (gridColumns) {
+            // If custom preset, enable input and set to custom value
+            if (columns === 'custom') {
+              gridColumns.readOnly = false;
+              gridColumns.value = gridColumns.getAttribute('data-custom-value') || 'repeat(auto-fill, minmax(300px, 1fr))';
+            } 
+            // If auto-fill preset, disable input and set special value
+            else if (columns === 'auto-fill') {
+              gridColumns.readOnly = true;
+              gridColumns.value = 'auto-fill';
+            }
+            // For other presets, disable input and set preset value
+            else {
+              gridColumns.readOnly = true;
+              gridColumns.value = columns;
+            }
           }
           
-          // Handle custom preset
-          if (columns === 'custom') {
-            // Make editable and use stored custom value
-            gridColumns.readOnly = false;
-            const customValue = gridColumns.getAttribute('data-custom-value') || '${options.grid.columns}';
-            gridColumns.value = customValue;
-          } else if (columns === 'auto-fill') {
-            // For auto-fill, we'll handle this specially in applySettings
-            gridColumns.readOnly = true;
-            gridColumns.value = 'auto-fill (dynamic)';
-          } else {
-            // For other presets, show the actual value
-            gridColumns.readOnly = true;
-            gridColumns.value = columns;
-          }
-          
-          // Apply settings immediately for live effect
+          // Apply settings immediately
           applySettings();
-          
-          // Save the current grid settings
-          Salla.storage.set('salla_demo_grid', {
-            columns: columns === 'auto-fill' ? 'auto-fill' : gridColumns.value,
-            gap: document.getElementById('gridGapValue')?.value + (document.getElementById('gridGapUnit')?.value || 'rem'),
-            minWidth: document.getElementById('gridMinWidthValue')?.value + (document.getElementById('gridMinWidthUnit')?.value || 'px')
           });
         });
-      });
       
       // Drawer functionality
       const componentDrawer = document.getElementById('componentDrawer');
@@ -1518,7 +1542,7 @@ export function createDemoHTML(
         await window.Salla.onReady();
         Salla.lang.setLocale(currentLang);  
         const hiddenComponents = Salla.storage.get('hidden-salla-components', []);
-        Object.keys(customComponentsSchema).forEach(name => renderComponent(name));
+        Object.keys(window.customComponentsSchema || {}).forEach(name => renderComponent(name));
         initSettings();
         })();
 
