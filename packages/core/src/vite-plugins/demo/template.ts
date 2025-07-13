@@ -262,16 +262,14 @@ export function createDemoHTML(
         }
       }
     }
+
+    function getGridColumns() {
+      return document.getElementById('gridColumns')?.value || '${options.grid.columns}';
+    }
     
     function applySettings() {
       // Get grid columns setting
-      let gridColumns;
-      const activePreset = document.querySelector('.grid-preset-btn.active');
-      if (activePreset && activePreset.getAttribute('data-columns') !== 'custom') {
-        gridColumns = activePreset.getAttribute('data-columns') || '${options.grid.columns}';
-      } else {
-        gridColumns = document.getElementById('gridColumns')?.value || '${options.grid.columns}';
-      }
+      const gridColumns = getGridColumns();
       
       // Get grid gap with unit
       const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
@@ -1118,26 +1116,26 @@ export function createDemoHTML(
               <label for="gridColumnsPreset">Grid Columns Layout</label>
               <div class="grid-columns-presets">
                 <button type="button" class="grid-preset-btn" data-columns="repeat(1, 1fr)" title="1 column">
-                  <span class="grid-preset-icon">▭</span>
+                  <span class="grid-preset-icon sicon-inbox-multi"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(2, 1fr)" title="2 columns">
-                  <span class="grid-preset-icon">▯ ▯</span>
+                  <span class="grid-preset-icon sicon-layout-grid"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(3, 1fr)" title="3 columns">
-                  <span class="grid-preset-icon">▯▯▯</span>
+                  <span class="grid-preset-icon sicon-grid"></span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(4, 1fr)" title="4 columns">
                   <span class="grid-preset-icon">▮▮▮▮</span>
                 </button>
                 <button type="button" class="grid-preset-btn" data-columns="repeat(auto-fill, minmax(250px, 1fr))" title="Auto-fill">
-                  <span class="grid-preset-icon">≡</span>
+                  <span class="grid-preset-icon sicon-window-layout"></span>
                 </button>
                 <button type="button" class="grid-preset-btn grid-preset-custom" data-columns="custom" title="Custom">
-                  <span class="grid-preset-icon">⚙️</span>
+                  <span class="grid-preset-icon sicon-settings"></span>
                 </button>
               </div>
-              <div id="customGridColumnsContainer" class="custom-grid-columns-container" style="display: none;">
-                <input type="text" id="gridColumns" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}">
+              <div id="customGridColumnsContainer" class="custom-grid-columns-container">
+                <input type="text" id="gridColumns" dir="ltr" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}">
                 <small>CSS grid-template-columns value</small>
               </div>
             </div>
@@ -1335,20 +1333,17 @@ export function createDemoHTML(
       document.querySelectorAll('.grid-preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           // Update active preset button
-          document.querySelectorAll('.grid-preset-btn').forEach(presetBtn => {
-            presetBtn.classList.remove('active');
-          });
+          document.querySelectorAll('.grid-preset-btn').forEach(presetBtn => presetBtn.classList.remove('active'));
           btn.classList.add('active');
           
           const columns = btn.getAttribute('data-columns');
-          const customContainer = document.getElementById('customGridColumnsContainer');
-          
-          // Show/hide custom input based on selection
-          if (columns === 'custom') {
-            if (customContainer) customContainer.style.display = 'block';
-          } else {
-            if (customContainer) customContainer.style.display = 'none';
+          const gridColumns = document.getElementById('gridColumns');
+          if(!gridColumns){
+            console.error('Grid columns element not found: document.getElementById("gridColumns")');
+            return;
           }
+          gridColumns.readOnly = columns === 'custom';
+          gridColumns.value = columns;
         });
       });
       
