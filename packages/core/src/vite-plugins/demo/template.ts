@@ -230,11 +230,9 @@ export function createDemoHTML(
         applySettings();
       }, 500));
       
-      // Add event listeners to form builder language checkboxes for live updates
-      document.querySelectorAll('.language-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-          applySettings();
-        });
+      // Add event listener to form builder languages multi-select for live updates
+      document.getElementById('formbuilderLanguages')?.addEventListener('change', () => {
+        applySettings();
       });
       
       // Add event listener to form builder default language select for live updates
@@ -393,11 +391,9 @@ export function createDemoHTML(
       Salla.storage.set('salla_demo_custom_css', customCSS);
       Salla.storage.set('salla_demo_custom_js', customJS);
       
-      // Get selected languages from checkboxes
-      const selectedLanguages = [];
-      document.querySelectorAll('.language-checkbox:checked').forEach(checkbox => {
-        selectedLanguages.push(checkbox.value);
-      });
+      // Get selected languages from multi-select
+      const formbuilderLanguagesSelect = document.getElementById('formbuilderLanguages');
+      const selectedLanguages = Array.from(formbuilderLanguagesSelect?.selectedOptions || []).map(option => option.value);
       
       // Ensure at least one language is selected
       if (selectedLanguages.length === 0) {
@@ -410,6 +406,9 @@ export function createDemoHTML(
       // Ensure default language is in the selected languages
       if (!selectedLanguages.includes(formbuilderDefaultLang)) {
         selectedLanguages.push(formbuilderDefaultLang);
+        // Also select it in the UI
+        const option = Array.from(formbuilderLanguagesSelect?.options || []).find(opt => opt.value === formbuilderDefaultLang);
+        if (option) option.selected = true;
       }
       
       // Save formbuilder settings
@@ -418,10 +417,8 @@ export function createDemoHTML(
         defaultLanguage: formbuilderDefaultLang
       });
       
-      // Reload page to apply formbuilder settings
-      if (document.getElementById('reload-after-save')?.checked) {
-        window.location.reload();
-      }
+      // Reset component settings drawer on form-builder changes
+      resetComponentSettings();
     }
 
     window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
@@ -1252,40 +1249,27 @@ export function createDemoHTML(
             
             <div class="settings-form-group">
               <label for="formbuilderLanguages">Languages</label>
-              <div class="settings-languages-container">
-                <div class="settings-languages-list">
-                  ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
-                    <label class="settings-language-item">
-                      <input type="checkbox" class="language-checkbox" value="${lang}" 
-                        ${options.formbuilder.languages.includes(lang) ? 'checked' : ''}>
-                      <span>${lang}</span>
-                    </label>
-                  `).join('')}
-                </div>
-              </div>
-              <small>Select languages to include in the form builder</small>
+              <select id="formbuilderLanguages" class="settings-input" multiple size="5">
+                ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                  <option value="${lang}" ${options.formbuilder.languages.includes(lang) ? 'selected' : ''}>${lang}</option>
+                `).join('')}
+              </select>
+              <small>Select languages to include in the form builder (hold Ctrl/Cmd to select multiple)</small>
             </div>
             
             <div class="settings-form-group">
               <label for="formbuilderDefaultLang">Default Language</label>
-              <input type="text" id="formbuilderDefaultLang" class="settings-input" placeholder="ar" value="${options.formbuilder.defaultLanguage}">
-              <small>Default language code</small>
-            </div>
-            
-            <div class="settings-form-group">
-              <label>
-                <input type="checkbox" id="reload-after-save">
-                <span>Reload page after saving settings</span>
-              </label>
-              <small>Required for form builder settings to take effect</small>
+              <select id="formbuilderDefaultLang" class="settings-input">
+                ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                  <option value="${lang}" ${options.formbuilder.defaultLanguage === lang ? 'selected' : ''}>${lang}</option>
+                `).join('')}
+              </select>
+              <small>Default language for the form builder</small>
             </div>
           </div>
         </div>
         
-        <div class="settings-actions">
-          <button class="btn btn-primary" onclick="applySettings()">Apply Settings</button>
-          <button class="btn btn-secondary" onclick="closeDrawer()">Close Drawer</button>
-        </div>
+        <!-- Footer removed as requested -->
       </div>
     </div>
     
@@ -1508,6 +1492,34 @@ export function createDemoHTML(
         document.querySelectorAll('.drawer.active').forEach(element => element.classList.remove('active'));
         drawerOverlay?.classList.remove('active');
         document.body.style.overflow = '';
+      }
+      
+      function resetComponentSettings() {
+        // Reset any component settings that need to be updated when form-builder settings change
+        // Find all form-builder components and reset them
+        const formComponents = document.querySelectorAll('[data-component-type="form-builder"]');
+        formComponents.forEach(component => {
+          // Trigger a reset or re-render for the component
+          component.classList.add('settings-updated');
+          setTimeout(() => {
+            component.classList.remove('settings-updated');
+          }, 1000);
+        });
+        
+        // Trigger custom event for components to listen to
+        document.dispatchEvent(new CustomEvent('formbuilder-settings-changed', {
+          detail: {
+            timestamp: new Date().getTime()
+          }
+        }));
+        
+        // Close the component drawer if it's open
+        const componentDrawer = document.getElementById('componentDrawer');
+        if (componentDrawer?.classList.contains('active')) {
+          componentDrawer.classList.remove('active');
+          document.getElementById('drawerOverlay')?.classList.remove('active');
+          document.body.style.overflow = '';
+        }
       }
       
       // Function to reset settings and reload page
