@@ -1249,7 +1249,7 @@ export function createDemoHTML(
             
             <div class="settings-form-group">
               <label for="formbuilderLanguages">Languages</label>
-              <select id="formbuilderLanguages" class="settings-input" multiple size="5">
+              <select id="formbuilderLanguages" class="settings-input" multiple>
                 ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
                   <option value="${lang}" ${options.formbuilder.languages.includes(lang) ? 'selected' : ''}>${lang}</option>
                 `).join('')}
@@ -1331,7 +1331,14 @@ export function createDemoHTML(
         
         const grid = document.getElementById('componentsGrid');
         if (grid) {
-            grid.style.gridTemplateColumns = savedGrid.columns;
+            // Apply grid settings immediately
+            if (savedGrid.columns === 'auto-fill') {
+                // Apply special auto-fill behavior
+                updateGridBasedOnItemCount();
+            } else {
+                // Apply normal grid columns
+                grid.style.gridTemplateColumns = savedGrid.columns;
+            }
             grid.style.gap = savedGrid.gap;
         }
         
@@ -1341,6 +1348,34 @@ export function createDemoHTML(
             const [_, gapValue, gapUnit] = gapMatch;
             document.getElementById('gridGapValue').value = gapValue;
             document.getElementById('gridGapUnit').value = gapUnit;
+        }
+        
+        // Initialize grid preset buttons based on saved columns
+        const gridColumnsInput = document.getElementById('gridColumns');
+        if (gridColumnsInput) {
+            gridColumnsInput.value = savedGrid.columns;
+            
+            // Set the active preset button
+            document.querySelectorAll('.grid-preset-btn').forEach(btn => {
+                const columns = btn.getAttribute('data-columns');
+                if (columns === savedGrid.columns || 
+                    (columns === 'auto-fill' && savedGrid.columns === 'auto-fill') || 
+                    (columns === 'custom' && !['1', '2', '3', '4', 'auto-fill'].includes(savedGrid.columns))) {
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.grid-preset-btn').forEach(b => b.classList.remove('active'));
+                    // Add active class to this button
+                    btn.classList.add('active');
+                    
+                    // Handle custom preset
+                    if (columns === 'custom') {
+                        gridColumnsInput.readOnly = false;
+                        gridColumnsInput.setAttribute('data-custom-value', savedGrid.columns);
+                    } else {
+                        gridColumnsInput.readOnly = true;
+                    }
+                }
+            });
         }
         
         // Apply custom CSS if saved
