@@ -151,21 +151,43 @@ export function createDemoHTML(
       element.checked = Salla.storage.get('hidden-salla-components', []).includes(componentName);
       element.checked ?showComponent(componentName) : hideComponent(componentName);
     }
-
-    function openSettingsDrawer(){
-      const settingsDrawer = document.getElementById('settingsDrawer');
-      settingsDrawer?.classList.add('active');
-      
-      // Set current visibility state for components
-      settingsDrawer?.querySelectorAll('.visibility-checkbox')
-      .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
-      
-      // Set current grid settings
-      const savedGrid = Salla.storage.get('salla_demo_grid', {
+    // Get the updated gap value from localStorage
+    function getSavedGrid() {
+        return Salla.storage.get('salla_demo_grid', {
         columns: '${options.grid.columns}',
         gap: '${options.grid.gap}',
         minWidth: '${options.grid.minWidth}'
-      });
+        });
+    }
+    function getSavedLanguages(){
+        return Salla.storage.get('salla_demo_formbuilder', {
+        languages: ${JSON.stringify(options.formbuilder.languages)},
+        defaultLanguage: ${JSON.stringify(options.formbuilder.defaultLanguage)}
+        });
+    }
+
+    // ==================== BEGIN SETTINGS DRAWER ====================
+    function openSettingsDrawer(){
+      const settingsDrawer = document.getElementById('settingsDrawer');
+      if(!settingsDrawer){
+        return;
+      }
+      settingsDrawer.classList.add('active');
+      
+      drawerOverlay?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      if(settingsDrawer.is_rendered){
+        return;
+      }
+      settingsDrawer.is_rendered = true;
+      
+      // Set current visibility state for components
+      settingsDrawer.querySelectorAll('.visibility-checkbox')
+      .forEach(checkbox => checkbox.checked = !Salla.storage.get('hidden-salla-components', []).includes(checkbox.value));
+      
+      // Set current grid settings
+      const savedGrid = getSavedGrid();
       
       // Set grid columns preset
       const gridPresetBtns = document.querySelectorAll('.grid-preset-btn');
@@ -209,11 +231,33 @@ export function createDemoHTML(
           applySettings();
         });
       }
-      
+        const gridGapInput = document.getElementById('gridGapValue');
+        const gridGapUnitInput = document.getElementById('gridGapUnit');
+      if(gridGapInput && savedGrid.gap){
+        gridGapInput.value = savedGrid.gap.match(/[\\d\\.]+/)?.[0];
+        gridGapUnitInput.value = savedGrid.gap.match(/[a-z%]+/)?.[0];
+      }
       // Add event listeners to grid gap inputs for live updates
-      document.getElementById('gridGapValue')?.addEventListener('input', () => {
-        const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
-        const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
+      gridGapInput?.addEventListener('input', () => {
+        const gridGapValue = gridGapInput?.value || '1';
+        const gridGapUnit = gridGapUnitInput?.value || 'rem';
+        const gridGap = gridGapValue + gridGapUnit;
+        
+        // Update the gap in real-time
+        const grid = document.getElementById('componentsGrid');
+        if (grid) {
+          grid.style.gap = gridGap;
+        }
+
+        const savedGrid = getSavedGrid();
+        
+        
+        Salla.storage.set('salla_demo_grid', {...savedGrid, gap: gridGap});
+      });
+      
+      gridGapUnitInput?.addEventListener('change', () => {
+        const gridGapValue = gridGapInput.value || '1';
+        const gridGapUnit = gridGapUnitInput.value || 'rem';
         const gridGap = gridGapValue + gridGapUnit;
         
         // Update the gap in real-time
@@ -222,84 +266,20 @@ export function createDemoHTML(
           grid.style.gap = gridGap;
         }
         
-        // Save the updated gap value to localStorage
-        const savedGrid = Salla.storage.get('salla_demo_grid', {
-          columns: '${options.grid.columns}',
-          gap: '${options.grid.gap}',
-          minWidth: '${options.grid.minWidth}'
-        });
-        
-        Salla.storage.set('salla_demo_grid', {
-          columns: savedGrid.columns,
-          gap: gridGap,
-          minWidth: savedGrid.minWidth
-        });
+        Salla.storage.set('salla_demo_grid', {...getSavedGrid(), gap: gridGap});
       });
       
-      document.getElementById('gridGapUnit')?.addEventListener('change', () => {
-        const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
-        const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
-        const gridGap = gridGapValue + gridGapUnit;
-        
-        // Update the gap in real-time
-        const grid = document.getElementById('componentsGrid');
-        if (grid) {
-          grid.style.gap = gridGap;
-        }
-        
-        // Save the updated gap value to localStorage
-        const savedGrid = Salla.storage.get('salla_demo_grid', {
-          columns: '${options.grid.columns}',
-          gap: '${options.grid.gap}',
-          minWidth: '${options.grid.minWidth}'
-        });
-        
-        Salla.storage.set('salla_demo_grid', {
-          columns: savedGrid.columns,
-          gap: gridGap,
-          minWidth: savedGrid.minWidth
-        });
-      });
-      
-      // Min Width Breakpoint is now handled by backend only
-      
-      // Add event listeners to custom CSS input for live updates
       document.getElementById('customCSS')?.addEventListener('input', debounce(() => {
         applySettings();
       }, 500));
       
-      // Add event listeners to custom JS input for live updates
       document.getElementById('customJS')?.addEventListener('input', debounce(() => {
         applySettings();
       }, 500));
       
-      // Add event listener to form builder languages multi-select for live updates
-      document.getElementById('formbuilderLanguages')?.addEventListener('change', () => {
-        applySettings();
-      });
+      document.getElementById('formbuilderLanguages')?.addEventListener('change', () => applySettings());
+      document.getElementById('formbuilderDefaultLang')?.addEventListener('change', () => applySettings());
       
-      // Add event listener to form builder default language select for live updates
-      document.getElementById('formbuilderDefaultLang')?.addEventListener('change', () => {
-        applySettings();
-      });
-      
-      // Parse and set grid gap value and unit
-      const gridGapValue = document.getElementById('gridGapValue');
-      const gridGapUnit = document.getElementById('gridGapUnit');
-      if (gridGapValue && gridGapUnit) {
-        // Parse saved grid gap
-        const savedGap = savedGrid.gap;
-        const gapMatch = savedGap.match(/([\d.]+)([a-z%]+)/);
-        if (gapMatch) {
-          const [_, value, unit] = gapMatch;
-          gridGapValue.value = value;
-          gridGapUnit.value = unit;
-        } else {
-          // Default values
-          gridGapValue.value = '1.5';
-          gridGapUnit.value = 'rem';
-        }
-      }
       
       // Set current custom CSS and JS
       const customCSS = document.getElementById('customCSS');
@@ -311,28 +291,15 @@ export function createDemoHTML(
       }
       
       // Set current formbuilder settings
-      const savedFormbuilder = Salla.storage.get('salla_demo_formbuilder', {
-        languages: ${JSON.stringify(options.formbuilder.languages)},
-        defaultLanguage: '${options.formbuilder.defaultLanguage}'
-      });
+      const savedFormbuilder = getSavedLanguages();
       
       // Set language checkboxes
-      document.querySelectorAll('.language-checkbox').forEach(checkbox => {
-        const lang = checkbox.value;
-        checkbox.checked = savedFormbuilder.languages.includes(lang);
-      });
+      document.querySelectorAll('#formbuilderLanguages option').forEach(option => option.selected = savedFormbuilder.languages.includes(option.value));
       
-      // Set default language
-      const formbuilderDefaultLang = document.getElementById('formbuilderDefaultLang');
-      if (formbuilderDefaultLang) {
-        formbuilderDefaultLang.value = savedFormbuilder.defaultLanguage;
-      }
-      
-      drawerOverlay?.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      document.getElementById('formbuilderDefaultLang').value = savedFormbuilder.defaultLanguage;
     }
+    // ==================== END SETTINGS DRAWER ====================
     
-    // Helper function to parse value and unit from CSS value
     function parseValueAndUnit(cssValue) {
       const match = cssValue.match(/^([\d.]+)([a-z%]*)$/);
       if (match) {
@@ -395,7 +362,7 @@ export function createDemoHTML(
       }
       
       // Get grid gap with unit
-      const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
+      const gridGapValue = document.getElementById('gridGapValue')?.value || '1';
       const gridGapUnit = document.getElementById('gridGapUnit')?.value || 'rem';
       const gridGap = gridGapValue + gridGapUnit;
       
@@ -454,7 +421,7 @@ export function createDemoHTML(
       
       // Ensure at least one language is selected
       if (selectedLanguages.length === 0) {
-        selectedLanguages.push('en'); // Default to English if nothing selected
+        selectedLanguages.push('ar'); // Default to English if nothing selected
       }
       
       // Get default language
@@ -1269,7 +1236,7 @@ export function createDemoHTML(
             <div class="settings-form-group">
               <label for="gridGap">Grid Gap</label>
               <div class="settings-input-with-unit">
-                <input type="number" id="gridGapValue" class="settings-input settings-input-number" placeholder="1.5" step="0.1" min="0">
+                <input type="number" id="gridGapValue" class="settings-input settings-input-number" placeholder="1" step="0.1" min="0">
                 <select id="gridGapUnit" class="settings-input-unit">
                   <option value="px">px</option>
                   <option value="rem">rem</option>
@@ -1307,17 +1274,16 @@ export function createDemoHTML(
             <div class="settings-form-group">
               <label for="formbuilderLanguages">Languages</label>
               <select id="formbuilderLanguages" class="settings-input" multiple>
-                ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                ${['ar','en','bg','cs','da','de','el','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
                   <option value="${lang}" ${options.formbuilder.languages.includes(lang) ? 'selected' : ''}>${lang}</option>
                 `).join('')}
               </select>
-              <small>Select languages to include in the form builder (hold Ctrl/Cmd to select multiple)</small>
             </div>
             
             <div class="settings-form-group">
               <label for="formbuilderDefaultLang">Default Language</label>
               <select id="formbuilderDefaultLang" class="settings-input">
-                ${['ar','bg','cs','da','de','el','en','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
+                ${['ar','en','bg','cs','da','de','el','es','et','fa','fi','fr','ga','he','hi','hr','hu','hy','ind','it','ja','ko','lv','mt','nl','pl','pt','ro','ru','sl','sq','sv','tl','tr','uk','ur','zh','bn'].map(lang => `
                   <option value="${lang}" ${options.formbuilder.defaultLanguage === lang ? 'selected' : ''}>${lang}</option>
                 `).join('')}
               </select>
@@ -1380,11 +1346,7 @@ export function createDemoHTML(
 
       function initSettings(){
         // Initialize grid settings from localStorage
-        const savedGrid = Salla.storage.get('salla_demo_grid', {
-            columns: '${options.grid.columns}',
-            gap: '${options.grid.gap}',
-            minWidth: '${options.grid.minWidth}'
-        });
+        const savedGrid = getSavedGrid();
         
         const grid = document.getElementById('componentsGrid');
         if (grid) {
@@ -1562,7 +1524,7 @@ export function createDemoHTML(
               </div>
             \`;
         }
-        
+        const savedFormbuilder = getSavedLanguages();
         drawerContent.innerHTML = \`
             <form-builder-3
              form-key="form-builder-3"
@@ -1573,8 +1535,8 @@ export function createDemoHTML(
              direction="v"
              button="start"
              css-url="${formbuilderAssets.join(',')}"
-             language-list="${options.formbuilder.languages.join(',')}"
-             default-language="${options.formbuilder.defaultLanguage}"
+             language-list="\${savedFormbuilder.languages.join(',')}"
+             default-language="\${savedFormbuilder.defaultLanguage}"
              submit-label="\${__demoTrans('saveSettings')}"></form-builder-3>
         \`;
       }
