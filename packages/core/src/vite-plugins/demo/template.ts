@@ -183,15 +183,30 @@ export function createDemoHTML(
       
       // If no preset matches, activate custom option
       if (!activePresetFound) {
-        const customBtn = document.querySelector('.grid-preset-custom');
+        const customBtn = document.querySelector('.grid-preset-btn[data-columns="custom"]');
         customBtn?.classList.add('active');
-        const customContainer = document.getElementById('customGridColumnsContainer');
-        if (customContainer) customContainer.style.display = 'block';
+        
+        // Store the current value as custom value
+        const gridColumnsInput = document.getElementById('gridColumns');
+        if (gridColumnsInput) {
+          gridColumnsInput.setAttribute('data-custom-value', savedGrid.columns);
+          gridColumnsInput.readOnly = false;
+        }
       }
       
-      // Set grid columns value
-      const gridColumns = document.getElementById('gridColumns');
-      if (gridColumns) gridColumns.value = savedGrid.columns;
+      // Initialize grid columns input
+      const gridColumnsInput = document.getElementById('gridColumns');
+      if (gridColumnsInput) {
+        gridColumnsInput.value = savedGrid.columns;
+        gridColumnsInput.addEventListener('input', () => {
+          // Store custom value when user edits
+          const customPreset = document.querySelector('.grid-preset-btn[data-columns="custom"]');
+          if (customPreset && customPreset.classList.contains('active')) {
+            gridColumnsInput.setAttribute('data-custom-value', gridColumnsInput.value);
+          }
+          applySettings();
+        });
+      }
       
       // Parse and set grid gap value and unit
       const gridGapValue = document.getElementById('gridGapValue');
@@ -264,12 +279,47 @@ export function createDemoHTML(
     }
 
     function getGridColumns() {
-      return document.getElementById('gridColumns')?.value || '${options.grid.columns}';
+      const gridColumnsInput = document.getElementById('gridColumns');
+      return gridColumnsInput?.value || '${options.grid.columns}';
+    }
+    
+    function updateGridBasedOnItemCount() {
+      const componentsGrid = document.getElementById('componentsGrid');
+      if (!componentsGrid) return;
+      
+      const gridItems = componentsGrid.querySelectorAll(':scope > *');
+      
+      if (gridItems.length <= 2) {
+        // For 1-2 items, use auto-fit with full width
+        componentsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(0, 1fr))';
+        // Reset all items grid-column property
+        gridItems.forEach(item => item.style.gridColumn = '');
+      } else {
+        // For 3+ items, use 3 columns with first item spanning all columns
+        componentsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        // Reset all items first
+        gridItems.forEach(item => item.style.gridColumn = '');
+        // Make first item span 3 columns
+        if (gridItems[0]) gridItems[0].style.gridColumn = 'span 3';
+      }
     }
     
     function applySettings() {
-      // Get grid columns setting
-      const gridColumns = getGridColumns();
+      const activePreset = document.querySelector('.grid-preset-btn.active');
+      const componentsGrid = document.getElementById('componentsGrid');
+      if (!componentsGrid) return;
+      
+      // Apply special auto-fill behavior if selected
+      if (activePreset && activePreset.getAttribute('data-columns') === 'auto-fill') {
+        updateGridBasedOnItemCount();
+      } else {
+        // Apply normal grid columns
+        const gridColumns = getGridColumns();
+        componentsGrid.style.gridTemplateColumns = gridColumns;
+        // Reset all items grid-column property
+        const gridItems = componentsGrid.querySelectorAll(':scope > *');
+        gridItems.forEach(item => item.style.gridColumn = '');
+      }
       
       // Get grid gap with unit
       const gridGapValue = document.getElementById('gridGapValue')?.value || '1.5';
@@ -281,10 +331,9 @@ export function createDemoHTML(
       const gridMinWidthUnit = document.getElementById('gridMinWidthUnit')?.value || 'px';
       const gridMinWidth = gridMinWidthValue + gridMinWidthUnit;
       
-      // Apply grid settings
+      // Apply grid gap
       const componentsGrid = document.getElementById('componentsGrid');
       if (componentsGrid) {
-        componentsGrid.style.gridTemplateColumns = gridColumns;
         componentsGrid.style.gap = gridGap;
       }
       
@@ -1127,7 +1176,7 @@ export function createDemoHTML(
                 <button type="button" class="grid-preset-btn" data-columns="repeat(4, 1fr)" title="4 columns">
                   <span class="grid-preset-icon">▮▮▮▮</span>
                 </button>
-                <button type="button" class="grid-preset-btn" data-columns="repeat(auto-fill, minmax(250px, 1fr))" title="Auto-fill">
+                <button type="button" class="grid-preset-btn" data-columns="auto-fill" title="Auto-fill">
                   <span class="grid-preset-icon sicon-window-layout"></span>
                 </button>
                 <button type="button" class="grid-preset-btn grid-preset-custom" data-columns="custom" title="Custom">
@@ -1135,7 +1184,7 @@ export function createDemoHTML(
                 </button>
               </div>
               <div id="customGridColumnsContainer" class="custom-grid-columns-container">
-                <input type="text" id="gridColumns" dir="ltr" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}">
+                <input type="text" id="gridColumns" dir="ltr" class="settings-input" placeholder="repeat(3, 1fr)" value="${options.grid.columns}" data-custom-value="${options.grid.columns}">
                 <small>CSS grid-template-columns value</small>
               </div>
             </div>
@@ -1342,8 +1391,32 @@ export function createDemoHTML(
             console.error('Grid columns element not found: document.getElementById("gridColumns")');
             return;
           }
-          gridColumns.readOnly = columns === 'custom';
-          gridColumns.value = columns;
+          
+          // Handle custom preset
+          if (columns === 'custom') {
+            // Make editable and use stored custom value
+            gridColumns.readOnly = false;
+            const customValue = gridColumns.getAttribute('data-custom-value') || '${options.grid.columns}';
+            gridColumns.value = customValue;
+          } else if (columns === 'auto-fill') {
+            // For auto-fill, we'll handle this specially in applySettings
+            gridColumns.readOnly = true;
+            gridColumns.value = 'auto-fill (dynamic)';
+          } else {
+            // For other presets, show the actual value
+            gridColumns.readOnly = true;
+            gridColumns.value = columns;
+          }
+          
+          // Apply settings immediately for live effect
+          applySettings();
+          
+          // Save the current grid settings
+          Salla.storage.set('salla_demo_grid', {
+            columns: columns === 'auto-fill' ? 'auto-fill' : gridColumns.value,
+            gap: document.getElementById('gridGapValue')?.value + (document.getElementById('gridGapUnit')?.value || 'rem'),
+            minWidth: document.getElementById('gridMinWidthValue')?.value + (document.getElementById('gridMinWidthUnit')?.value || 'px')
+          });
         });
       });
       
