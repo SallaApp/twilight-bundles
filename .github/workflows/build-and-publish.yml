@@ -1,12 +1,6 @@
 name: Build and Publish Packages
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'packages/core/**'
-      - 'packages/starter-kit/**'
   workflow_dispatch:
     inputs:
       versionType:
