@@ -95,5 +95,5 @@ jobs:
           # Use pnpm to version all packages
           pnpm version $VERSION_TYPE
           
-          # Publish only core and starter-kit packages (exclude form-builder-mock)
-          pnpm publish --filter "@salla/twilight-core" --filter "@salla/twilight-starter-kit" --access public --no-git-checks
+          # Publish only the core package (form-builder-mock is excluded)
+          pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-starter-kit" --access public --no-git-checks
