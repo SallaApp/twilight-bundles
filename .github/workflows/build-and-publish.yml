@@ -53,7 +53,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
           
       - name: Configure npm authentication
-        run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN_INFO}}" >> ~/.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
           
       - name: Install dependencies and build packages
         run: |
@@ -81,7 +81,7 @@ jobs:
       - name: Publish to npm
         if: ${{ env.NEW_CHANGES == 'true' || github.event.inputs.versionType }}
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN_INFO}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
         run: |
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
