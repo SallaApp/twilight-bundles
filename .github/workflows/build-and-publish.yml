@@ -1,66 +1,32 @@
-name: Deploy Form Builder Mock API
+name: Build and Publish Packages
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'packages/form-builder-mock/**'
-  workflow_dispatch:  # Allows manual triggering
+      - 'packages/core/**'
+      - 'packages/starter-kit/**'
+  workflow_dispatch:
+    inputs:
+      versionType:
+        description: 'Version type for npm publish'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prepatch
+          - preminor
+          - premajor
 
 jobs:
-  deploy:
+  build-and-publish:
     runs-on:
       group: default
-    name: Deploy Form Builder Mock Worker
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GIT_ACTION_TOKEN }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          # Remove npm cache since we're using pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-          run_install: false
-          
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/form-builder-mock/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-form-builder-mock-
-
-      - name: Install dependencies
-        working-directory: packages/form-builder-mock
-        run: pnpm install --frozen-lockfile
-
-      - name: Publish to Cloudflare
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN_MERCHANT }}
-          accountId: ${{ secrets.CF_ACCOUT_ID_SALLA_GROUP }}
-          workingDirectory: 'packages/form-builder-mock'
-          command: deploy
-          
-  publish-npm:
-    runs-on:
-      group: default
-    name: Publish Core and Starter-Kit to NPM
-    needs: deploy
+    name: Build and Publish Core and Starter-Kit
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -78,6 +44,19 @@ jobs:
         with:
           version: 10
           run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
           
       - name: Configure npm authentication
         run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN_INFO}}" >> ~/.npmrc
@@ -102,7 +81,7 @@ jobs:
         if: ${{ env.NEW_CHANGES == 'true' }}
         run: |
           git status
-          git commit -m "build(core): 📦Auto build assets"
+          git commit -m "build(core): 📦 Auto build assets"
           git push
           
       - name: Publish to npm
