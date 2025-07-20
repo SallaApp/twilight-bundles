@@ -1,12 +1,6 @@
 name: Build and Publish Packages
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'packages/core/**'
-      - 'packages/starter-kit/**'
   workflow_dispatch:
     inputs:
       versionType:
@@ -94,6 +88,7 @@ jobs:
           
           # Use pnpm to version all packages
           pnpm version $VERSION_TYPE
-          
+
           # Publish only the core package (form-builder-mock is excluded)
           pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-starter-kit" --access public --no-git-checks
+
