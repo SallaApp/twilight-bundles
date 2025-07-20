@@ -6,7 +6,8 @@
   "main": "./dist/twilight-bundles.js",
   "module": "./dist/twilight-bundles.js",
   "bin": {
-    "tw-component": "./bin/tw-component.js"
+    "tw-component": "./bin/tw-component.js",
+    "tw-init": "./bin/tw-init.js"
   },
   "exports": {
     ".": {
