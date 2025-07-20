@@ -92,7 +92,6 @@ jobs:
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
           
-          # Use pnpm to publish packages
-          pnpm --filter "@salla/twilight-core" version $VERSION_TYPE
-          pnpm --filter "@salla/twilight-starter-kit" version $VERSION_TYPE
-          pnpm publish --filter "@salla/twilight-core" --filter "@salla/twilight-starter-kit" --access public --no-git-checks
+          # Use pnpm to version and publish all packages
+          pnpm version $VERSION_TYPE
+          pnpm publish --access public --no-git-checks
