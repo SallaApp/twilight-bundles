@@ -92,26 +92,31 @@ export function createDemoHTML(
         const tempDom = document.createElement('div');
         const config = getComponentData(componentName);
         tempDom.innerHTML=\`<div class="component-card" data-component="\${componentName}">
-            <div class="component-card-header">
-                <h2>
-                    <i class="sicon-tag"></i>
-                    \${componentName}
-                </h2>
-                <div class="component-card-actions">
+              <div class="component-card-header">
+                <div class="container">
+                  <h2>
+                      <i class="sicon-tag"></i>
+                      \${componentName}
+                  </h2>
+                  <div class="component-card-actions">
                     <button class="component-visibility-btn" aria-label="Toggle visibility" 
-                        onclick="hideComponent('\${componentName}')" 
-                        title="Hide component">
-                            <i class="sicon-eye"></i>
-                        </button>
-                        <button class="component-settings-btn" aria-label="Open settings"
-                        data-component="\${componentName}"
-                        data-schema="\${config}">
-                            <i class="sicon-settings"></i>
-                        </button>
-                    </div>
+                    onclick="hideComponent('\${componentName}')" 
+                    title="Hide component">
+                        <i class="sicon-eye"></i>
+                    </button>
+                    <button class="component-settings-btn" aria-label="Open settings"
+                    data-component="\${componentName}"
+                    data-schema="\${config}">
+                        <i class="sicon-settings"></i>
+                    </button>
+                  </div>
+                </div>
                 </div>
                 <salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>
+              
+              <div style='text-align:center;min-height: 100px;border-bottom: 1px solid #eee;display: flex;justify-content: center;align-items: center; opacity: 0.6'>\${componentName}</div>
             </div>
+
         </div>\`;
         tempDom.querySelector('.component-settings-btn').addEventListener('click', () => openDrawer(componentName));
         const grid = document.getElementById('componentsGrid');
@@ -513,7 +518,6 @@ export function createDemoHTML(
 
       body {
         min-height: 100vh;
-        background-color: var(--bg-secondary);
       }
 
       header {
@@ -624,17 +628,27 @@ export function createDemoHTML(
       }
 
       .component-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.75rem;
+        min-height: 60px;
+        position: relative;
       }
 
       .component-card-header {
+        position: absolute;
+        z-index: 10;
+        width: 100%;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .component-card-header .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0.75rem;
+      }
+
+      .component-card:hover .component-card-header {
+        opacity: 1;
       }
 
       .component-card-header h2 {
@@ -1134,9 +1148,7 @@ export function createDemoHTML(
       </div>
     </header>
     <main>
-      <div class="container">
         <div class="components-grid" id="componentsGrid"></div>
-      </div>
     </main>
     
     <!-- Drawer overlay -->
