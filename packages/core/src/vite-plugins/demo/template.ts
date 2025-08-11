@@ -612,6 +612,7 @@ export function createDemoHTML(
         grid-template-columns: ${options.grid.columns};
         gap: ${options.grid.gap};
         margin-top: 0;
+        overflow: hidden;
       }
 
       @media (max-width: ${options.grid.minWidth}) {
