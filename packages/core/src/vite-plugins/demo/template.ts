@@ -93,11 +93,6 @@ export function createDemoHTML(
         const config = getComponentData(componentName);
         tempDom.innerHTML=\`<div class="component-card" data-component="\${componentName}">
               <div class="component-card-header">
-                <div class="container">
-                  <h2>
-                      <i class="sicon-tag"></i>
-                      \${componentName}
-                  </h2>
                   <div class="component-card-actions">
                     <button class="component-visibility-btn" aria-label="Toggle visibility" 
                     onclick="hideComponent('\${componentName}')" 
@@ -109,12 +104,10 @@ export function createDemoHTML(
                     data-schema="\${config}">
                         <i class="sicon-settings"></i>
                     </button>
-                  </div>
-                </div>
+                  </div> 
                 </div>
                 <salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>
               
-              <div style='text-align:center;min-height: 100px;border-bottom: 1px solid #eee;display: flex;justify-content: center;align-items: center; opacity: 0.6'>\${componentName}</div>
             </div>
 
         </div>\`;
@@ -635,38 +628,26 @@ export function createDemoHTML(
       .component-card-header {
         position: absolute;
         z-index: 10;
-        width: 100%;
+        top: 50%;
+        transform: translateY(-50%) translateX(-100%);
+        left: 0;
         opacity: 0;
-        transition: opacity 0.2s ease;
-      }
-
-      .component-card-header .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
       }
 
       .component-card:hover .component-card-header {
         opacity: 1;
-      }
-
-      .component-card-header h2 {
-        color: var(--component-title);
-        font-size: 1.125rem;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .component-card-header h2 i {
-        font-size: 1.25rem;
+        transform: translateY(-50%) translateX(0);
       }
 
       .component-card-actions {
         display: flex;
+        flex-direction: column;
         gap: 0.5rem;
+        background: #fff;
+        padding: 10px;
+        border-radius: 0 5px 5px 0;
+        box-shadow: 11px 0px 20px -10px rgba(0, 0, 0, 0.05), 8px 3px 13px -4px rgba(0, 0, 0, 0.05);
       }
       
       .component-visibility-btn,
