@@ -54,8 +54,8 @@ jobs:
           
       - name: Configure npm authentication
         env:
-          NPM_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-        run: echo "//registry.npmjs.org/:_authToken=${{ env.NPM_TOKEN }}" >> ~/.npmrc
+          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+        run: echo "//registry.npmjs.org/:_authToken=${{ env.NODE_AUTH_TOKEN }}" >> ~/.npmrc
           
       - name: Install dependencies and build packages
         run: |
@@ -81,6 +81,8 @@ jobs:
           git push
           
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
         if: ${{ env.NEW_CHANGES == 'true' || github.event.inputs.versionType }}
         run: |
           # Determine version bump type
