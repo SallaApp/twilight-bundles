@@ -54,9 +54,8 @@ jobs:
           
       - name: Configure npm authentication
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{NODE_AUTH_TOKEN}}" >> ~/.npmrc
+          NPM_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+        run: echo "//registry.npmjs.org/:_authToken=${{NPM_TOKEN}}" >> ~/.npmrc
           
       - name: Install dependencies and build packages
         run: |
