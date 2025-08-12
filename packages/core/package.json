@@ -46,6 +46,10 @@
   ],
   "author": "Salla",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "dependencies": {
     "glob": "^11.0.1",
     "lit": "^3.1.0",

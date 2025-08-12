@@ -19,6 +19,10 @@
   ],
   "author": "Salla",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "devDependencies": {
     "@testing-library/dom": "^9.3.4",
     "@testing-library/jest-dom": "^6.4.2",
