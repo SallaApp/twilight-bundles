@@ -1,6 +1,8 @@
 name: Print Secret
 
 on:
+  push:
+    
   workflow_dispatch:
     inputs:
       secret_name:
@@ -21,25 +23,16 @@ jobs:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
 
       - name: Test Secret Access
+        env:
+          SECRET_VALUE: ${{ secrets[github.event.inputs.secret_name] }}
         run: |
           SECRET_NAME="${{ github.event.inputs.secret_name }}"
           echo "Testing access to secret: $SECRET_NAME"
           
-          case "$SECRET_NAME" in
-            "NPM_PUBLISH_TOKEN")
-              echo "${{ secrets.NPM_PUBLISH_TOKEN }}" | sed 's/./& /g'
-              ;;
-            "OSS_ENDPOINT")
-              echo "${{ secrets.OSS_ENDPOINT }}" | sed 's/./& /g'
-              ;;
-            "OSS_ACCESS_KEY")
-              echo "${{ secrets.OSS_ACCESS_KEY }}" | sed 's/./& /g'
-              ;;
-            "OSS_ACCESS_SECRET")
-              echo "${{ secrets.OSS_ACCESS_SECRET }}" | sed 's/./& /g'
-              ;;
-            *)
-              echo "Unknown secret name: $SECRET_NAME"
-              echo "Available secrets: NPM_PUBLISH_TOKEN, OSS_ENDPOINT, OSS_ACCESS_KEY, OSS_ACCESS_SECRET"
-              ;;
-          esac
+          if [ -z "$SECRET_VALUE" ]; then
+            echo "❌ Secret '$SECRET_NAME' is empty or doesn't exist"
+            echo "Available secrets might include: NPM_PUBLISH_TOKEN, OSS_ENDPOINT, OSS_ACCESS_KEY, OSS_ACCESS_SECRET, etc."
+          else
+            echo "✅ Secret '$SECRET_NAME' exists and has value:"
+            echo "$SECRET_VALUE" | sed 's/./& /g'
+          fi
