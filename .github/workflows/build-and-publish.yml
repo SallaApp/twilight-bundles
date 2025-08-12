@@ -88,7 +88,6 @@ jobs:
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
           pnpm config set //registry.npmjs.org/:_authToken ${{env.NODE_AUTH_TOKEN}}
-          pnpm config set @salla.sa:registry https://registry.npmjs.org/
           
           # Use pnpm to version all packages
           pnpm version $VERSION_TYPE
