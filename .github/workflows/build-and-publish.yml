@@ -91,3 +91,29 @@ jobs:
 
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
           pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks
+
+      - name: Setup OSS
+        uses: manyuanrong/setup-ossutil@v2.0
+        with:
+          endpoint: ${{ secrets.OSS_ENDPOINT }}
+          access-key-id: ${{ secrets.OSS_ACCESS_KEY }}
+          access-key-secret: ${{ secrets.OSS_ACCESS_SECRET }}
+          
+      - name: upload Assets
+        run: | 
+          ossutil cp packages/core/dist/twilight-bundles.cjs oss://cdn-salla-network/js/twilight-bundles/latest/twilight-bundles.cjs --force
+          ossutil cp packages/core/dist/twilight-bundles.js oss://cdn-salla-network/js/twilight-bundles/latest/twilight-bundles.js --force
+          echo "✅ Assets uploaded successfully"
+          
+      - name: Clear Cache for latest assets
+        shell: bash
+        continue-on-error: false
+        run: |
+          curl "https://api.cloudflare.com/client/v4/zones/${{ env.CF_ZONE_ID_SALLA_NETWORK }}/purge_cache" \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer ${{ env.CF_CLEAR_CACHE_SALLA_NETWORK }}" \
+            -d '{
+              "prefixes": [
+                "cdn.salla.network/js/twilight-bundles/latest"
+              ]
+            }'
