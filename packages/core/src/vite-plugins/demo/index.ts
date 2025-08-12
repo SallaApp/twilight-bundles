@@ -94,7 +94,7 @@ export function sallaDemoPlugin(options: DemoPluginOptions = {}): Plugin {
             // Create demo.html in temp directory
             fs.writeFileSync(demoPath, createDemoHTML(formattedComponents, {
                 grid: {
-                    columns: options.grid?.columns || 'repeat(auto-fill, minmax(300px, 1fr))',
+                    columns: options.grid?.columns || 'repeat(1, 1fr)',
                     gap: options.grid?.gap || '1rem',
                     minWidth: options.grid?.minWidth || '300px'
                 },

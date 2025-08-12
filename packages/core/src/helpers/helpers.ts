@@ -18,7 +18,7 @@ export default class Helpers {
             .then(() => Salla.event.onlyWhen('twilight-bundles::initiated'));
     }
 
-    static initializeSalla() {
+    static async initializeSalla() {
         if (Salla.status === 'ready') {
             salla.log('Salla is ready');
             return;
@@ -28,17 +28,29 @@ export default class Helpers {
 
         // Access the data attributes
         const demo = currentScript?.hasAttribute('demo-mode');
-        const storeId = currentScript?.getAttribute('store-id');
-        const config = JSON.parse(currentScript?.getAttribute('config') || 'false');
+        let storeId = currentScript?.getAttribute('store-id');
+        let config = JSON.parse(currentScript?.getAttribute('config') || 'false');
         // const components = currentScript?.getAttribute('components')?.split(',') || [];
 
         if (demo || config || storeId) {
+            storeId = storeId || '1510890315';
+            config = config || await Helpers.getStoreSettings(storeId);
             return Salla.init(config || {
                 "debug": true,
-                "store": { "id": storeId || 1510890315 }
+                "store": { "id": storeId }
             });
         }
         return Salla.onReady();
+    }
+
+    static async getStoreSettings(storeId: string) {
+        let settings = Salla.storage.session.get(`store-settings-${storeId}`);
+        if (settings) {
+            return settings;
+        }
+        settings = (await fetch('https://api.salla.dev/store/v1/store/settings', { 'headers': { 'store-identifier': storeId } }).then(res => res.json())).data;
+        Salla.storage.session.set(`store-settings-${storeId}`, settings);
+        return settings;
     }
 
     static makeSureSallaIsReady() {
