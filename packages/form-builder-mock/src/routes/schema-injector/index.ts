@@ -172,17 +172,8 @@ export function injectDataToSchema(schema: any[], data: Record<string, any>): an
   function getLingualValue(item: any, id: string, data: Record<string, any> | null): any {
     const value = data?.[id] ?? null;
     const isMultiLanguage = item.multilanguage ?? false;
-    
-    // If already in translations format (array), return as is
-    if (isMultiLanguage && !Array.isArray(value)) {
-      // In the PHP version, this would extract translations from data
-      // For our JS implementation, we'll create a simple object with the current language
-      const currentLang = 'ar'; // Default to Arabic, could be made dynamic
-      return { [currentLang]: value };
-    }
-  
     if (isMultiLanguage) {
-      return Array.isArray(value) ? value : { ar: value };
+      return typeof value === 'object' ? value : { ar: value };
     }
   
     // For non-multilanguage fields, extract the value from the language object if needed

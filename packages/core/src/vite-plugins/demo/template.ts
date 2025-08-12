@@ -445,24 +445,34 @@ export function createDemoHTML(
 
     window.addEventListener('FormBuilder::form-builder-3::request-success',async ({detail:payload}) => {
       const ignoredKeys = ['static-', '$','twilight-bundles-component-name'];
-      const data = Object.fromEntries(
-        Object.entries(payload).filter(([key]) => !ignoredKeys.some(ignoredKey=>key.startsWith(ignoredKey)))
-      );
+      const savedFormbuilder = getSavedLanguages();
+      let data = Object.entries(payload).filter(([key]) => !ignoredKeys.some(ignoredKey=>key.startsWith(ignoredKey)));
+      data = Object.fromEntries(data);
       const componentName = payload['twilight-bundles-component-name'];
-      Salla.storage.set('form-builder::data_' + componentName, data);
-      if (componentName && window.customComponentsSchema && window.customComponentsSchema[componentName]) {
-        // Inject the data into the schema
-        const schema = window.customComponentsSchema[componentName];
-        await fetch('${formBuilderMockUrl}/schema-injector', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ schema, data }),
+      if (!componentName || !window.customComponentsSchema || !window.customComponentsSchema[componentName]) {
+        return;
+      }
+      // Inject the data into the schema
+      const schema = window.customComponentsSchema[componentName];
+      await fetch('${formBuilderMockUrl}/schema-injector', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ schema, data }),
         }).then(res=>res.json())
         .then(data=>Salla.storage.set('form-builder::'+componentName, data))
+        .then(()=> {
+            data = Object.entries(data)
+            .map(([key,value])=>{
+            return (typeof value !=='object' || !value[savedFormbuilder.defaultLanguage])
+                ? [key,value]
+                : [key,value[savedFormbuilder.defaultLanguage]];
+            });
+            data = Object.fromEntries(data);
+            Salla.storage.set('form-builder::data_' + componentName, data);
+        })
         .then(()=>reRenderComponent(componentName))
         .then(()=>closeDrawer())
         .catch(err=>console.error('Error injecting data into schema:', err));
-      }
     });
     </script>
     <link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://cdn.salla.network/images/logo/logo-square.png" />
@@ -1168,7 +1178,7 @@ export function createDemoHTML(
         <div class="settings-tabs">
           <div class="settings-tab-headers">
             <button class="settings-tab-btn active" data-tab="components">Components</button>
-            <button class="settings-tab-btn" data-tab="grid">Grid</button>
+            <button class="settings-tab-btn" style="display: none;" data-tab="grid">Grid</button>
             <button class="settings-tab-btn" data-tab="custom-code">Custom Code</button>
             <button class="settings-tab-btn" data-tab="formbuilder">Form Builder</button>
           </div>
