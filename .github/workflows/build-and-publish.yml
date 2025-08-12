@@ -52,11 +52,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
           
-      - name: Configure npm authentication
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
-        run: echo "//registry.npmjs.org/:_authToken=${{ env.NODE_AUTH_TOKEN }}" >> ~/.npmrc
-          
       - name: Install dependencies and build packages
         run: |
           pnpm install --no-frozen-lockfile
@@ -87,7 +82,6 @@ jobs:
         run: |
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
-          pnpm config set //registry.npmjs.org/:_authToken ${{env.NODE_AUTH_TOKEN}}
           
           # Use pnpm to version all packages
           pnpm version $VERSION_TYPE
