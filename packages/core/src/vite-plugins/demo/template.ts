@@ -92,26 +92,24 @@ export function createDemoHTML(
         const tempDom = document.createElement('div');
         const config = getComponentData(componentName);
         tempDom.innerHTML=\`<div class="component-card" data-component="\${componentName}">
-            <div class="component-card-header">
-                <h2>
-                    <i class="sicon-tag"></i>
-                    \${componentName}
-                </h2>
-                <div class="component-card-actions">
+              <div class="component-card-header">
+                  <div class="component-card-actions">
                     <button class="component-visibility-btn" aria-label="Toggle visibility" 
-                        onclick="hideComponent('\${componentName}')" 
-                        title="Hide component">
-                            <i class="sicon-eye"></i>
-                        </button>
-                        <button class="component-settings-btn" aria-label="Open settings"
-                        data-component="\${componentName}"
-                        data-schema="\${config}">
-                            <i class="sicon-settings"></i>
-                        </button>
-                    </div>
+                    onclick="hideComponent('\${componentName}')" 
+                    title="Hide component">
+                        <i class="sicon-eye"></i>
+                    </button>
+                    <button class="component-settings-btn" aria-label="Open settings"
+                    data-component="\${componentName}"
+                    data-schema="\${config}">
+                        <i class="sicon-settings"></i>
+                    </button>
+                  </div> 
                 </div>
                 <salla-custom-component \${config?'config="'+config+'"':''} component-name="\${componentName}"></salla-custom-component>
+              
             </div>
+
         </div>\`;
         tempDom.querySelector('.component-settings-btn').addEventListener('click', () => openDrawer(componentName));
         const grid = document.getElementById('componentsGrid');
@@ -513,7 +511,6 @@ export function createDemoHTML(
 
       body {
         min-height: 100vh;
-        background-color: var(--bg-secondary);
       }
 
       header {
@@ -615,6 +612,7 @@ export function createDemoHTML(
         grid-template-columns: ${options.grid.columns};
         gap: ${options.grid.gap};
         margin-top: 0;
+        overflow: hidden;
       }
 
       @media (max-width: ${options.grid.minWidth}) {
@@ -624,35 +622,33 @@ export function createDemoHTML(
       }
 
       .component-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.75rem;
+        min-height: 60px;
+        position: relative;
       }
 
       .component-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
+        position: absolute;
+        z-index: 10;
+        top: 50%;
+        transform: translateY(-50%) translateX(-100%);
+        left: 0;
+        opacity: 0;
+        transition: all 0.3s ease;
       }
 
-      .component-card-header h2 {
-        color: var(--component-title);
-        font-size: 1.125rem;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .component-card-header h2 i {
-        font-size: 1.25rem;
+      .component-card:hover .component-card-header {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
       }
 
       .component-card-actions {
         display: flex;
+        flex-direction: column;
         gap: 0.5rem;
+        background: #fff;
+        padding: 10px;
+        border-radius: 0 5px 5px 0;
+        box-shadow: 11px 0px 20px -10px rgba(0, 0, 0, 0.05), 8px 3px 13px -4px rgba(0, 0, 0, 0.05);
       }
       
       .component-visibility-btn,
@@ -1134,9 +1130,7 @@ export function createDemoHTML(
       </div>
     </header>
     <main>
-      <div class="container">
         <div class="components-grid" id="componentsGrid"></div>
-      </div>
     </main>
     
     <!-- Drawer overlay -->
