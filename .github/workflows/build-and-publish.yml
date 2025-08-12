@@ -90,7 +90,7 @@ jobs:
           pnpm version $VERSION_TYPE
 
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
-          pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks
+          pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks --force
 
       - name: Setup OSS
         uses: manyuanrong/setup-ossutil@v2.0
