@@ -53,7 +53,9 @@ jobs:
             ${{ runner.os }}-pnpm-store-
           
       - name: Configure npm authentication
-        run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
+          echo "@salla.sa:registry=https://registry.npmjs.org/" >> ~/.npmrc
           
       - name: Install dependencies and build packages
         run: |
