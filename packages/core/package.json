@@ -1,5 +1,5 @@
 {
-  "name": "@salla.sa/twilight-bundles",
+  "name": "@jalmatari/twilight-bundles",
   "version": "0.1.1",
   "description": "SDK for Salla Twilight Bundles - Develop and build custom components for Salla platform",
   "type": "module",
