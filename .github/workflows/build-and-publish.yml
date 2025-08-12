@@ -86,6 +86,11 @@ jobs:
           # Use pnpm to version all packages in workspace
           pnpm -r version $VERSION_TYPE
           
+          # Commit version changes back to repository
+          git add .
+          git commit -m "chore(release): 🔖bump version to $(node -p "require('./packages/core/package.json').version")"
+          git push
+          
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
           pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks --force
 
