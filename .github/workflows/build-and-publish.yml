@@ -55,7 +55,7 @@ jobs:
       - name: Configure npm authentication
         run: |
           echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
-          echo "@jalmatari:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@salla.sa:registry=https://registry.npmjs.org/" >> ~/.npmrc
           
       - name: Install dependencies and build packages
         run: |
@@ -91,8 +91,12 @@ jobs:
           # Use pnpm to version all packages
           pnpm version $VERSION_TYPE
 
+          # Configure npm authentication for pnpm
+          npm config set //registry.npmjs.org/:_authToken ${{secrets.NPM_PUBLISH_TOKEN}}
+          npm config set @salla.sa:registry https://registry.npmjs.org/
+          
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
-          pnpm publish --filter "@jalmatari/twilight-bundles" --filter "@jalmatari/twilight-bundles-starter-kit" --access public --no-git-checks --force
+          pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks --force
 
       - name: Setup OSS
         uses: manyuanrong/setup-ossutil@v2.0
