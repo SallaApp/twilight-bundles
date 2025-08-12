@@ -1,7 +1,7 @@
 {
   "name": "@salla.sa/twilight-bundles-monorepo",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Monorepo for Salla Twilight Bundles SDK and Starter Kit",
   "type": "module",
   "scripts": {
@@ -23,5 +23,5 @@
     "node": ">=16.0.0",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@9.x"
+  "packageManager": "pnpm@9.0.0"
 }
