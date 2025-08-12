@@ -52,11 +52,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
           
-      - name: Configure npm authentication
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
-          echo "@salla.sa:registry=https://registry.npmjs.org/:_authToken=${{secrets.NPM_PUBLISH_TOKEN}}" >> ~/.npmrc
-          
       - name: Install dependencies and build packages
         run: |
           pnpm install --no-frozen-lockfile
@@ -81,15 +76,30 @@ jobs:
           git push
           
       - name: Publish to npm
-        if: ${{ env.NEW_CHANGES == 'true' || github.event.inputs.versionType }}
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH_TOKEN}}
+        if: ${{ env.NEW_CHANGES == 'true' || github.event.inputs.versionType }}
         run: |
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
           
-          # Use pnpm to version all packages
-          pnpm version $VERSION_TYPE
+          # Check current versions
+          echo "Current core version: $(node -p "require('./packages/core/package.json').version")"
+          echo "Current starter-kit version: $(node -p "require('./packages/starter-kit/package.json').version")"
+          
+          # Use npm to version packages in workspace (pnpm -r version doesn't work as expected)
+          (cd packages/core && npm version $VERSION_TYPE --no-git-tag-version)
+          (cd packages/starter-kit && npm version $VERSION_TYPE --no-git-tag-version)
+          
+          # Check new versions
+          echo "New core version: $(node -p "require('./packages/core/package.json').version")"
+          echo "New starter-kit version: $(node -p "require('./packages/starter-kit/package.json').version")"
+          
+          # Commit version changes back to repository
+          git add .
+          NEW_VERSION=$(node -p "require('./packages/core/package.json').version")
+          git commit -m "chore(release): 🔖bump version to $NEW_VERSION"
+          git push
           
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
           pnpm publish --filter "@salla.sa/twilight-bundles" --filter "@salla.sa/twilight-bundles-starter-kit" --access public --no-git-checks --force
