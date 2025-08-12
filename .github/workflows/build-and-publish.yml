@@ -83,12 +83,15 @@ jobs:
           # Determine version bump type
           VERSION_TYPE=${{ github.event.inputs.versionType || 'patch' }}
           
-          # Use pnpm to version all packages in workspace
-          pnpm -r version $VERSION_TYPE
+          # Use npm to version packages in workspace (pnpm -r version doesn't work as expected)
+          cd packages/core && npm version $VERSION_TYPE --no-git-tag-version
+          cd ../starter-kit && npm version $VERSION_TYPE --no-git-tag-version
+          cd ../..
           
           # Commit version changes back to repository
           git add .
-          git commit -m "chore(release): 🔖bump version to $(node -p "require('./packages/core/package.json').version")"
+          NEW_VERSION=$(node -p "require('./packages/core/package.json').version")
+          git commit -m "chore(release): 🔖bump version to $NEW_VERSION"
           git push
           
           # Publish both core and starter-kit packages (form-builder-mock is excluded)
