@@ -14,10 +14,17 @@ jobs:
       group: default
     name: Test Secret Access
     steps:
+      - name: Doppler Secrets Fetch
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: secrets
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: github-secrets
+          doppler-config: prd
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GIT_ACTION_TOKEN }}
+          token: ${{ steps.secrets.outputs.GIT_ACTION_TOKEN }}
 
       - name: Test Secret Access
         env:
