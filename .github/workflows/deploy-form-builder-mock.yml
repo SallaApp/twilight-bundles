@@ -14,10 +14,17 @@ jobs:
       group: default
     name: Deploy Form Builder Mock Worker
     steps:
+      - name: Doppler Secrets Fetch
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: secrets
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: github-secrets
+          doppler-config: prd
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GIT_ACTION_TOKEN }}
+          token: ${{ steps.secrets.outputs.GIT_ACTION_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -51,7 +58,7 @@ jobs:
       - name: Publish to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CF_API_TOKEN_MERCHANT }}
-          accountId: ${{ secrets.CF_ACCOUT_ID_SALLA_GROUP }}
+          apiToken: ${{ steps.secrets.outputs.CF_API_TOKEN_MERCHANT }}
+          accountId: ${{ steps.secrets.outputs.CF_ACCOUT_ID_SALLA_GROUP }}
           workingDirectory: 'packages/form-builder-mock'
           command: deploy
